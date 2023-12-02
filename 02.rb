@@ -1,11 +1,4 @@
 # # # PART ONE # # #
-# Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
-# Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue
-# Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red
-# Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red
-# Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green
-# games possible => 1, 2, 5
-# sum => 8
 
 # méthode pour récupérer les parties
 # entrée = "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green"
@@ -57,7 +50,7 @@ end
 # méthode pour trouver la réponse
 # entrée = [[{}, {}], [{}, {}]]
 # sortie = 8
-def give_answer(games)
+def give_answer1(games)
   games_possible = []
   games.each_with_index do |game, index|
     games_possible << index + 1 if is_game_possible(game)
@@ -77,5 +70,46 @@ while input.downcase != 'fin'
 end
 
 puts "Réponse de la partie 1 :"
-puts give_answer(games)
+puts give_answer1(games)
+puts "-----------"
+
+# # # PART TWO # # #
+
+# méthode pour trouver les 3 nombres minimums
+# entrée = [{:blue=>3, :red=>4}, {:red=>1, :green=>2, :blue=>6}, {:green=>2}]
+# sortie = {blue: 6, red: 4, green: 2}
+def find_minimums(arr)
+  mins = {blue: 0, red: 0, green: 0}
+  colors = mins.keys
+  arr.each do |set|
+    colors.each do |color|
+      mins[color] = set[color] if set[color] && mins[color] < set[color]
+    end
+  end
+  mins
+end
+
+# méthode pour trouver le produit des minimums
+# entrée = {blue: 6, red: 4, green: 2}
+# sortie = 48
+def calculate_product(mins)
+  product = 1
+  mins.values.each { |m| product *= m }
+  product
+end
+
+# méthode pour trouver la réponse
+# entrée = [[{}, {}], [{}, {}]]
+# sortie = 2286
+def give_answer2(games)
+  answer = []
+  games.each do |game|
+    mins = find_minimums(game)
+    answer << calculate_product(mins)
+  end
+  answer.sum
+end
+
+puts "Réponse de la partie 1 :"
+puts give_answer2(games)
 puts "-----------"
