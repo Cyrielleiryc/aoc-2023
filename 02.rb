@@ -4,16 +4,8 @@
 # Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red
 # Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red
 # Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green
-# only 12 red cubes, 13 green cubes, and 14 blue cubes
 # games possible => 1, 2, 5
 # sum => 8
-
-# méthode pour récupérer le numéro du jeu
-# entrée = "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green"
-# sortie = 1
-def number_of_game(str)
-  str[5].to_i
-end
 
 # méthode pour récupérer les parties
 # entrée = "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green"
@@ -39,19 +31,51 @@ def create_value(str)
   sets = sets(str)
   sets.map{ |set| set_to_hash(set)}
 end
-# puts "create_value('Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green')"
-# puts "should return an object : "
-# puts create_value("Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green") == [{blue: 3, red: 4}, {red: 1, green: 2, blue: 6}, {green: 2}]
+
+# méthode pour vérifier un set
+# entrées = {:blue=>3, :red=>4}  || {:green=>8, :red=>20, :blue=>6}
+# sorties = 0                    || 1
+def is_set_possible(set)
+  count = 0
+  count += 1 if set[:red] && set[:red] > 12
+  count += 1 if set[:green] && set[:green] > 13
+  count += 1 if set[:blue] && set[:blue] > 14
+  count
+end
+
+# méthode pour vérifier si un jeu est possible
+# entrée = [{:blue=>3, :red=>4}, {:red=>1, :green=>2, :blue=>6}, {:green=>2}]
+# sortie = true
+def is_game_possible(game)
+  answer = 0
+  game.each do |set|
+    answer += is_set_possible(set)
+  end
+  answer == 0
+end
+
+# méthode pour trouver la réponse
+# entrée = [[{}, {}], [{}, {}]]
+# sortie = 8
+def give_answer(games)
+  games_possible = []
+  games.each_with_index do |game, index|
+    games_possible << index + 1 if is_game_possible(game)
+  end
+  games_possible.sum
+end
 
 # on récupère les données
-games = {}
+games = []
 
 puts "Entrez les lignes (tapez 'fin' pour terminer la saisie) :"
 input = gets.chomp
 
 while input.downcase != 'fin'
-  games[number_of_game(input)] = create_value(input)
+  games << create_value(input)
   input = gets.chomp
 end
 
-puts games.to_s
+puts "Réponse de la partie 1 :"
+puts give_answer(games)
+puts "-----------"
