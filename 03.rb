@@ -1,4 +1,5 @@
-SYMBOLS = %w[* # + $ @ / % = - &]
+# SYMBOLS = %w[* # + $ @ / % = - & _]
+SYMBOLS = ['*', '#', '+', '$', '@', '/', '%', '=', '-', '&', '_', '£'].freeze
 
 # # # PART ONE # # #
 
@@ -6,7 +7,7 @@ SYMBOLS = %w[* # + $ @ / % = - &]
 # entrée = "..35..633."
 # sortie = {"35"=> [2, 3], "633"=> [6, 7, 8]}
 def find_numbers(line)
-  numbers = line.split(/\D/).reject{ |n| n == "" }
+  numbers = line.split(/\D/).reject { |n| n == '' }
   answer = {}
   numbers.each do |number|
     index_start = line.index(number)
@@ -56,7 +57,7 @@ def numbers_to_add(lines)
   numbers_to_add = []
   lines.each_with_index do |line, line_index|
     numbers = find_numbers(line)
-    numbers.keys.each do |number|
+    numbers.each_key do |number|
       numbers_to_add << number if number_valid?(lines, line_index, numbers[number])
     end
   end
@@ -75,6 +76,7 @@ while input.downcase != 'fin'
 end
 
 puts "Réponse de la partie 1 :"
-puts "numbers to add = #{numbers_to_add(lines)}"
-puts numbers_to_add(lines).sum
+numbers_to_be_added = numbers_to_add(lines)
+puts numbers_to_be_added.sum
 puts "-----------"
+# 523085 is wrong
