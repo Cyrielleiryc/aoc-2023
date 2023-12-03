@@ -1,25 +1,6 @@
-# 467..114..
-# ...*......
-# ..35..633.
-# ......#...
-# 617*......
-# .....+.58.
-# ..592.....
-# ......755.
-# ...$.*....
-# .664.598..
-# not adjacent => 114 et 58
-# somme des autres => 4361
-
 SYMBOLS = %w[* # + $ @ / % = - &]
 
 # # # PART ONE # # #
-# sur chaque ligne, on cherche les nombres
-# on récupère les indices de chaque chiffre
-# on regarde la ligne d'avant (indices + celui d'avant et celui d'après )
-# on regarde la ligne d'après
-# on regarde la ligne actuelle
-# nombre à conserver ou pas ?
 
 # méthode pour trouver les nombres sur une ligne et les indices des chiffres
 # entrée = "..35..633."
@@ -40,9 +21,10 @@ end
 # sortie = [1, 2, 3, 4] || [0, 1, 2]  || [7, 8, 9]
 def find_indexes_to_study(indexes, length)
   max_index = length - 1
-  indexes << indexes.last + 1 unless indexes.last == max_index
-  indexes.unshift(indexes[0] - 1) unless indexes[0].zero?
-  indexes
+  theses_indexes = [*indexes]
+  theses_indexes << indexes.last + 1 unless indexes.last == max_index
+  theses_indexes.unshift(indexes[0] - 1) unless indexes[0].zero?
+  theses_indexes
 end
 
 # méthode pour voir s'il y a un symbole aux indices donnés
@@ -57,3 +39,42 @@ def adjacent_symbol?(line, indexes)
   !count.zero?
 end
 
+# méthode pour vérifier les 3 lignes à étudier
+# entrée = [lines], line_index, indexes
+# sortie = true or false
+# # # TODO TODO TODO TODO
+def number_valid?(lines, line_index, indexes)
+  previous = line_index.zero? ? false : adjacent_symbol?(lines[line_index - 1], indexes)
+  actual = adjacent_symbol?(lines[line_index], indexes)
+  next_line = lines.length == line_index + 1 ? false : adjacent_symbol?(lines[line_index + 1], indexes)
+  previous || actual || next_line
+end
+
+# entrée = ["467..114..", "...*......", "..35..633."]
+# sortie = [467, 35]
+def numbers_to_add(lines)
+  numbers_to_add = []
+  lines.each_with_index do |line, line_index|
+    numbers = find_numbers(line)
+    numbers.keys.each do |number|
+      numbers_to_add << number if number_valid?(lines, line_index, numbers[number])
+    end
+  end
+  numbers_to_add.map(&:to_i)
+end
+
+# on récupère les données
+lines = []
+
+puts "Entrez les lignes (tapez 'fin' pour terminer la saisie) :"
+input = gets.chomp
+
+while input.downcase != 'fin'
+  lines << input
+  input = gets.chomp
+end
+
+puts "Réponse de la partie 1 :"
+puts "numbers to add = #{numbers_to_add(lines)}"
+puts numbers_to_add(lines).sum
+puts "-----------"
