@@ -34,3 +34,20 @@ def find_numbers(line)
   end
   answer
 end
+
+# méthode pour voir s'il y a un symbole aux indices donnés
+# entrées = "...*......", [2, 3]
+# sortie = 1
+def adjacent_symbol?(line, indexes)
+  indexes_to_check = find_indexes_to_study(indexes, line.length)
+end
+
+# méthode pour donner les indices à étudier (en fonction de la longueur de la ligne)
+# entrée = [2, 3]       || [0, 1]     || [8, 9] , 10
+# sortie = [1, 2, 3, 4] || [0, 1, 2]  || [7, 8, 9]
+def find_indexes_to_study(indexes, length)
+  max_index = length - 1
+  indexes << indexes.last + 1 unless indexes.last == max_index
+  indexes.unshift(indexes[0] - 1) unless indexes[0].zero?
+  indexes
+end
