@@ -11,7 +11,7 @@
 # not adjacent => 114 et 58
 # somme des autres => 4361
 
-SYMBOLS = %w[*#+$@/%=-&]
+SYMBOLS = %w[* # + $ @ / % = - &]
 
 # # # PART ONE # # #
 # sur chaque ligne, on cherche les nombres
@@ -35,13 +35,6 @@ def find_numbers(line)
   answer
 end
 
-# méthode pour voir s'il y a un symbole aux indices donnés
-# entrées = "...*......", [2, 3]
-# sortie = 1
-def adjacent_symbol?(line, indexes)
-  indexes_to_check = find_indexes_to_study(indexes, line.length)
-end
-
 # méthode pour donner les indices à étudier (en fonction de la longueur de la ligne)
 # entrée = [2, 3]       || [0, 1]     || [8, 9] , 10
 # sortie = [1, 2, 3, 4] || [0, 1, 2]  || [7, 8, 9]
@@ -51,3 +44,16 @@ def find_indexes_to_study(indexes, length)
   indexes.unshift(indexes[0] - 1) unless indexes[0].zero?
   indexes
 end
+
+# méthode pour voir s'il y a un symbole aux indices donnés
+# entrées = "...*......", [2, 3]
+# sortie = true
+def adjacent_symbol?(line, indexes)
+  indexes_to_check = find_indexes_to_study(indexes, line.length)
+  count = 0
+  indexes_to_check.each do |index|
+    count += 1 if SYMBOLS.include?(line[index])
+  end
+  !count.zero?
+end
+
