@@ -72,7 +72,57 @@ def calculate_answer1(lines)
   answer
 end
 
-# on récupère les données
+# # # PART TWO # # #
+
+# méthode pour dire s'il y a une ou plusieurs étoiles, si oui on donne leurs coordonnées
+# entrée => lines, actual_line_index, number_indexes
+# sortie => ["04", "12", etc.]
+def find_stars(lines, actual_line_index, number_indexes)
+  indexes_to_check = find_indexes_to_study(number_indexes, lines[actual_line_index].length)
+  indexes_of_surrounding_lines = find_indexes_to_study([actual_line_index], lines.length)
+  answer = []
+  indexes_of_surrounding_lines.each do |i|
+    indexes_to_check.each do |j|
+      answer << "#{i}#{j}" if lines[i][j] == '*'
+    end
+  end
+  answer
+end
+
+def create_gears(lines)
+  gears = {}
+  lines.each_with_index do |line, actual_line_index|
+    numbers = find_numbers(line)
+    numbers.each do |number_arr|
+      star_keys = find_stars(lines, actual_line_index, number_arr[1])
+
+      next if star_keys.empty?
+
+      star_keys.each do |star_key|
+        if gears[star_key]
+          gears[star_key] << number_arr[0].to_i
+        else
+          gears[star_key] = [number_arr[0].to_i]
+        end
+      end
+    end
+  end
+  gears
+end
+
+def gear_ratios(gears)
+  ratios = []
+  gears.each_value do |value|
+    next if value.length != 2
+
+    ratios << value[0] * value[1]
+  end
+  ratios
+end
+
+# # # ANSWERS # # #
+
+# getting the data from the terminal
 lines = []
 
 puts "Entrez les lignes (tapez 'fin' pour terminer la saisie) :"
@@ -83,89 +133,13 @@ while input.downcase != 'fin'
   input = gets.chomp
 end
 
+puts 'Réponse de la partie 1 :'
+puts calculate_answer1(lines)
+puts '-----------'
 
-# puts 'Réponse de la partie 1 :'
-# puts calculate_answer1(lines)
-# puts '-----------'
+gears = create_gears(lines)
+puts 'Réponse de la partie 2 :'
+puts gear_ratios(gears).sum
+puts '-----------'
 
-# # # PART TWO # # #
-
-# # méthode pour récupèrer les indices où il y a un chiffre dans chaque ligne
-# # entrée => lines
-# # sortie => [[0, 1, 2, 5, 6, 7], [], [etc]]
-# def where_are_digits(lines)
-#   answer = []
-#   lines.each do |line|
-#     line_indexes = []
-#     line.chars.each_with_index do |char, i|
-#       line_indexes << i if ('0'..'9').to_a.include?(char)
-#     end
-#     answer << line_indexes
-#   end
-#   answer
-# end
-# DIGIT_POSITIONS = where_are_digits(lines)
-
-# méthode pour dire s'il y a une étoile, si oui on donne ses coordonnées
-# entrée => lines, actual_line_index, number_indexes
-# sortie => false || [line_index, index on this line]
-def find_star(lines, actual_line_index, number_indexes)
-  indexes_to_check = find_indexes_to_study(number_indexes, lines[actual_line_index].length)
-  indexes_of_surrounding_lines = find_indexes_to_study([actual_line_index], lines.length)
-  answer = nil
-  indexes_of_surrounding_lines.each do |i|
-    indexes_to_check.each do |j|
-      answer = "#{i}#{j}" if lines[i][j] == '*'
-    end
-  end
-  answer.nil? ? false : answer
-end
-
-# def find_digits(lines, actual_line_index, star, number_indexes)
-#   surrounding_lines = find_indexes_to_study([star[0]], lines.length)
-#   indexes_to_check = find_indexes_to_study([star[1]], lines[actual_line_index].length)
-#   indexes_of_digits = {}
-#   surrounding_lines.each do |i|
-#     if i == actual_line_index
-#       common = (indexes_to_check - number_indexes) & DIGIT_POSITIONS[i]
-#     else
-#       common = indexes_to_check & DIGIT_POSITIONS[i]
-#     end
-#     indexes_of_digits[i] = common
-#   end
-#   indexes_of_digits
-# end
-
-# méthode pour créer un objet
-expected_gears = {
-  '13' => [467, 35],
-  '43' => [617],
-  '85' => [755, 598]
-}
-def create_gears(lines)
-  gears = {}
-  lines.each_with_index do |line, actual_line_index|
-    numbers = find_numbers(line)
-    # puts "###############################"
-    # puts "iteration on line #{actual_line_index}"
-    # puts "numbers = #{numbers}"
-    numbers.each do |number_arr|
-      # puts "-----------------------"
-      # puts "iteration on number #{number_arr[0]}"
-      # puts "star ? #{find_star(lines, actual_line_index, number_arr[1])}"
-      next unless find_star(lines, actual_line_index, number_arr[1])
-
-      star_key = find_star(lines, actual_line_index, number_arr[1])
-      if gears[star_key]
-        gears[star_key] << number_arr[0].to_i
-      else
-        gears[star_key] = [number_arr[0].to_i]
-      end
-    end
-  end
-  gears
-end
-
-def calculate_answer2(gears)
-
-end
+# wrong => 74804681 (too low)
