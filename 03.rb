@@ -1,5 +1,5 @@
 # SYMBOLS = %w[* # + $ @ / % = - & _]
-SYMBOLS = ['*', '#', '+', '$', '@', '/', '%', '=', '-', '&', '_', '£'].freeze
+SYMBOLS = %w[* # + $ @ / % = - & _ £ ^ { ( ) } ! : ;].freeze
 
 # # # PART ONE # # #
 
@@ -31,8 +31,7 @@ end
 # méthode pour voir s'il y a un symbole aux indices donnés
 # entrées = "...*......", [2, 3]
 # sortie = true
-def adjacent_symbol?(line, indexes)
-  indexes_to_check = find_indexes_to_study(indexes, line.length)
+def adjacent_symbol?(line, indexes_to_check)
   count = 0
   indexes_to_check.each do |index|
     count += 1 if SYMBOLS.include?(line[index])
@@ -45,23 +44,24 @@ end
 # sortie = true or false
 # # # TODO TODO TODO TODO
 def number_valid?(lines, line_index, indexes)
-  previous = line_index.zero? ? false : adjacent_symbol?(lines[line_index - 1], indexes)
-  actual = adjacent_symbol?(lines[line_index], indexes)
-  next_line = lines.length == line_index + 1 ? false : adjacent_symbol?(lines[line_index + 1], indexes)
+  indexes_to_check = find_indexes_to_study(indexes, lines[line_index].length)
+  previous = !line_index.zero? && adjacent_symbol?(lines[line_index - 1], indexes_to_check)
+  actual = adjacent_symbol?(lines[line_index], indexes_to_check)
+  next_line = lines.length != line_index + 1 && adjacent_symbol?(lines[line_index + 1], indexes_to_check)
   previous || actual || next_line
 end
 
 # entrée = ["467..114..", "...*......", "..35..633."]
-# sortie = [467, 35]
-def numbers_to_add(lines)
-  numbers_to_add = []
+# sortie = 4361
+def calculate_answer(lines)
+  answer = 0
   lines.each_with_index do |line, line_index|
     numbers = find_numbers(line)
     numbers.each_key do |number|
-      numbers_to_add << number if number_valid?(lines, line_index, numbers[number])
+      answer += number.to_i if number_valid?(lines, line_index, numbers[number])
     end
   end
-  numbers_to_add.map(&:to_i)
+  answer
 end
 
 # on récupère les données
@@ -76,7 +76,6 @@ while input.downcase != 'fin'
 end
 
 puts "Réponse de la partie 1 :"
-numbers_to_be_added = numbers_to_add(lines)
-puts numbers_to_be_added.sum
+puts "calculate_answer => #{calculate_answer(lines)}"
 puts "-----------"
 # 523085 is wrong
