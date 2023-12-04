@@ -1,4 +1,3 @@
-# SYMBOLS = %w[* # + $ @ / % = - & _]
 SYMBOLS = %w[* # + $ @ / % = - & _ £ ^ { ( ) } ! : ;].freeze
 
 # # # PART ONE # # #

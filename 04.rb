@@ -1,14 +1,4 @@
-# Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53 => 8
-# Card 2: 13 32 20 16 61 | 61 30 68 82 17 32 24 19 => 2
-# Card 3:  1 21 53 59 44 | 69 82 63 72 16 21 14  1 => 2
-# Card 4: 41 92 73 84 69 | 59 84 76 51 58  5 54 83 => 1
-# Card 5: 87 83 26 28 32 | 88 30 70 12 93 22 82 36 => 0
-# Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11 => 0
-# total = 13
-
-# pour chaque ligne, récupérer le tableau des nombres gagnants et celui des nombres joués
-# itérer sur les nombres joués, si c'est gagnant le compteur est augmenté
-# additionner le score de chaque carte
+# # # PART ONE # # #
 
 # méthode pour récupérer les nombres gagnants ou joués
 # entrée => "41 48 83 86 17 | 83 86  6 31 17  9 48 53", "winning"
@@ -37,9 +27,9 @@ end
 # méthode pour calculer le nombre total de points
 # entrée => toutes les cartes
 # sortie => 13
-def calculate_total(cards)
+def calculate_total1(cards)
   total = 0
-  cards.each { |card| total += points(card) }
+  cards.each { |card| total += points(card[0]) }
   total
 end
 
@@ -51,10 +41,58 @@ input = gets.chomp
 
 while input.downcase != 'fin'
   input.slice!(0,8)
-  cards << input
+  cards << [input, 1]
   input = gets.chomp
 end
 
 puts "Réponse de la partie 1 :"
-puts calculate_total(cards).to_s
+puts calculate_total1(cards).to_s
+puts "-----------"
+
+# # # PART TWO # # #
+
+# Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53 => 4 matching numbers
+# Card 2: 13 32 20 16 61 | 61 30 68 82 17 32 24 19    + 1   => 2 matching numbers
+# Card 3:  1 21 53 59 44 | 69 82 63 72 16 21 14  1    + 1       + 1 (x 2 cards) => 2 MN
+# Card 4: 41 92 73 84 69 | 59 84 76 51 58  5 54 83    + 1       + 2                 + 4 => 1MN
+# Card 5: 87 83 26 28 32 | 88 30 70 12 93 22 82 36    + 1                           + 4     + 8  => 0 MN
+# Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11 => 0MN
+# total of cards = 30
+
+# méthode pour donner le nombre de 'matching numbers' d'une carte
+# entrée => '41 48 83 86 17 | 83 86  6 31 17  9 48 53'
+def matching_numbers(card)
+  count = 0
+  winning_numbers = numbers(card, "winning")
+  numbers(card, "played").each do |number|
+    count += 1 if winning_numbers.include?(number)
+  end
+  count
+end
+
+# méthode pour joueur aux cartes et mettre à jour le nombre d'instances de chaque carte
+# entrée => [['41 48 83 86 17 | 83 86  6 31 17  9 48 53', 1], ['13 32 20 16 61 | 61 30 68 82 17 32 24 19', 1], etc]
+# sortie => [['41 48 83 86 17 | 83 86  6 31 17  9 48 53', 1], ['13 32 20 16 61 | 61 30 68 82 17 32 24 19', 2], etc]
+def play_scratchcards(cards)
+  cards.each_with_index do |scratchcard, index|
+    wins = matching_numbers(scratchcard[0])
+    (index + 1..index + wins).to_a.each do |i|
+      cards[i][1] += 1 * scratchcard[1]
+    end
+  end
+  cards
+end
+
+# méthode pour calculer le nombre total de scratchcards
+# entrée => [['41 48 83 86 17 | 83 86  6 31 17  9 48 53', 1], ['13 32 20 16 61 | 61 30 68 82 17 32 24 19', 2], etc]
+# sortie => 30
+def calculate_total2(cards)
+  total = 0
+  cards.each { |scratchcard| total += scratchcard[1] }
+  total
+end
+
+puts "Réponse de la partie 2 :"
+after_game = play_scratchcards(cards)
+puts calculate_total2(after_game)
 puts "-----------"
