@@ -4,7 +4,7 @@
 # entrée = "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green"
 # sortie = ["3 blue, 4 red", "1 red, 2 green, 6 blue", "2 green"]
 def sets(str)
-  str.slice!(0,8)
+  str.slice!(0, 8)
   str.split(';').map(&:strip)
 end
 
