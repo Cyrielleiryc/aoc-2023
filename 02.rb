@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # # # PART ONE # # #
 
 # méthode pour récupérer les parties
@@ -11,10 +13,10 @@ end
 # méthode pour créer un objet pour une partie
 # entrée = "1 red, 2 green, 6 blue"
 # sortie = {red: 1, green: 2, blue: 6}
-def set_to_hash(str)
+def one_set_to_hash(str)
   draws = str.split(',').map(&:strip)
   draws.map! { |s| s.split(' ').reverse }
-  draws.map! { |s| [s[0].to_sym, s[1].to_i]}.to_h
+  draws.map! { |s| [s[0].to_sym, s[1].to_i] }.to_h
 end
 
 # méthode transformer la ligne de texte en pair clé-valeur
@@ -22,13 +24,13 @@ end
 # sortie = [{blue: 3, red: 4}, {red: 1, green: 2, blue: 6}, {green: 2}]
 def create_value(str)
   sets = sets(str)
-  sets.map{ |set| set_to_hash(set)}
+  sets.map { |set| one_set_to_hash(set) }
 end
 
 # méthode pour vérifier un set
 # entrées = {:blue=>3, :red=>4}  || {:green=>8, :red=>20, :blue=>6}
 # sorties = 0                    || 1
-def is_set_possible(set)
+def this_set_possible?(set)
   count = 0
   count += 1 if set[:red] && set[:red] > 12
   count += 1 if set[:green] && set[:green] > 13
@@ -39,12 +41,12 @@ end
 # méthode pour vérifier si un jeu est possible
 # entrée = [{:blue=>3, :red=>4}, {:red=>1, :green=>2, :blue=>6}, {:green=>2}]
 # sortie = true
-def is_game_possible(game)
+def game_possible?(game)
   answer = 0
   game.each do |set|
-    answer += is_set_possible(set)
+    answer += this_set_possible?(set)
   end
-  answer == 0
+  answer.zero?
 end
 
 # méthode pour trouver la réponse
@@ -53,7 +55,7 @@ end
 def give_answer1(games)
   games_possible = []
   games.each_with_index do |game, index|
-    games_possible << index + 1 if is_game_possible(game)
+    games_possible << index + 1 if game_possible?(game)
   end
   games_possible.sum
 end
@@ -69,9 +71,9 @@ while input.downcase != 'fin'
   input = gets.chomp
 end
 
-puts "Réponse de la partie 1 :"
+puts 'Réponse de la partie 1 :'
 puts give_answer1(games)
-puts "-----------"
+puts '-----------'
 
 # # # PART TWO # # #
 
@@ -79,7 +81,7 @@ puts "-----------"
 # entrée = [{:blue=>3, :red=>4}, {:red=>1, :green=>2, :blue=>6}, {:green=>2}]
 # sortie = {blue: 6, red: 4, green: 2}
 def find_minimums(arr)
-  mins = {blue: 0, red: 0, green: 0}
+  mins = { blue: 0, red: 0, green: 0 }
   colors = mins.keys
   arr.each do |set|
     colors.each do |color|
@@ -94,7 +96,7 @@ end
 # sortie = 48
 def calculate_product(mins)
   product = 1
-  mins.values.each { |m| product *= m }
+  mins.each_value { |m| product *= m }
   product
 end
 
@@ -110,6 +112,6 @@ def give_answer2(games)
   answer.sum
 end
 
-puts "Réponse de la partie 1 :"
+puts 'Réponse de la partie 1 :'
 puts give_answer2(games)
-puts "-----------"
+puts '-----------'

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 SYMBOLS = %w[* # + $ @ / % = - & _ £ ^ { ( ) } ! : ;].freeze
 
 # # # PART ONE # # #
@@ -74,7 +76,7 @@ while input.downcase != 'fin'
   input = gets.chomp
 end
 
-puts "Réponse de la partie 1 :"
+puts 'Réponse de la partie 1 :'
 puts "calculate_answer => #{calculate_answer(lines)}"
-puts "-----------"
+puts '-----------'
 # 523085 is wrong

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # on récupère les données
 lines = []
 
@@ -22,14 +24,13 @@ lines.each do |line|
 end
 
 # on additionne pour donner le résultat
-puts "Réponse de la partie 1 :"
+puts 'Réponse de la partie 1 :'
 puts numbers_one.sum
-puts "-----------"
-
+puts '-----------'
 
 # # # PART TWO # # #
 
-DIGITS_IN_LETTERS = %w[one two three four five six seven eight nine]
+DIGITS_IN_LETTERS = %w[one two three four five six seven eight nine].freeze
 
 # méthode pour trouver le nombre en lettres
 def find_which_number(str)
@@ -44,7 +45,7 @@ numbers2 = []
 lines.each do |line|
   # on initialise un tableau pour les nombres trouvés
   new_line = []
-  while line.size > 0
+  while line.size.positive?
     # si ça commence par un chiffre
     if ('0'..'9').to_a.include?(line[0])
       new_line << line[0].to_i
@@ -61,6 +62,6 @@ lines.each do |line|
   numbers2 << "#{new_line[0]}#{new_line[-1]}".to_i
 end
 
-puts "Réponse de la partie 2 :"
+puts 'Réponse de la partie 2 :'
 puts numbers2.sum
-puts "-----------"
+puts '-----------'

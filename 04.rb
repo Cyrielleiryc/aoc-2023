@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # # # PART ONE # # #
 
 # méthode pour récupérer les nombres gagnants ou joués
@@ -15,8 +17,8 @@ end
 # sortie => 8
 def points(card)
   count = 0
-  winning_numbers = numbers(card, "winning")
-  numbers(card, "played").each do |number|
+  winning_numbers = numbers(card, 'winning')
+  numbers(card, 'played').each do |number|
     if winning_numbers.include?(number)
       count.zero? ? count += 1 : count *= 2
     end
@@ -40,31 +42,23 @@ puts "Entrez les lignes (tapez 'fin' pour terminer la saisie) :"
 input = gets.chomp
 
 while input.downcase != 'fin'
-  input.slice!(0,8)
+  input.slice!(0, 8)
   cards << [input, 1]
   input = gets.chomp
 end
 
-puts "Réponse de la partie 1 :"
-puts calculate_total1(cards).to_s
-puts "-----------"
+puts 'Réponse de la partie 1 :'
+puts calculate_total1(cards)
+puts '-----------'
 
 # # # PART TWO # # #
-
-# Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53 => 4 matching numbers
-# Card 2: 13 32 20 16 61 | 61 30 68 82 17 32 24 19    + 1   => 2 matching numbers
-# Card 3:  1 21 53 59 44 | 69 82 63 72 16 21 14  1    + 1       + 1 (x 2 cards) => 2 MN
-# Card 4: 41 92 73 84 69 | 59 84 76 51 58  5 54 83    + 1       + 2                 + 4 => 1MN
-# Card 5: 87 83 26 28 32 | 88 30 70 12 93 22 82 36    + 1                           + 4     + 8  => 0 MN
-# Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11 => 0MN
-# total of cards = 30
 
 # méthode pour donner le nombre de 'matching numbers' d'une carte
 # entrée => '41 48 83 86 17 | 83 86  6 31 17  9 48 53'
 def matching_numbers(card)
   count = 0
-  winning_numbers = numbers(card, "winning")
-  numbers(card, "played").each do |number|
+  winning_numbers = numbers(card, 'winning')
+  numbers(card, 'played').each do |number|
     count += 1 if winning_numbers.include?(number)
   end
   count
@@ -92,7 +86,7 @@ def calculate_total2(cards)
   total
 end
 
-puts "Réponse de la partie 2 :"
+puts 'Réponse de la partie 2 :'
 after_game = play_scratchcards(cards)
 puts calculate_total2(after_game)
-puts "-----------"
+puts '-----------'
