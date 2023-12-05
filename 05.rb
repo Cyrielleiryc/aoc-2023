@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # # # PART ONE # # #
 
 # méthode pour récupérer les seeds de départ

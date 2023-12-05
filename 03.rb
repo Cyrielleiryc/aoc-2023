@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative '03_data_for_tests'
 
 SYMBOLS = %w[* # + $ @ / % = - & _ £ ^ { ( ) } ! : ;].freeze
@@ -52,7 +54,6 @@ end
 # méthode pour vérifier les 3 lignes à étudier
 # entrée = [lines], line_index, indexes
 # sortie = true or false
-# # # TODO TODO TODO TODO
 def number_valid?(lines, line_index, indexes)
   indexes_to_check = find_indexes_to_study(indexes, lines[line_index].length)
   previous = !line_index.zero? && adjacent_symbol?(lines[line_index - 1], indexes_to_check)
