@@ -1,3 +1,5 @@
+require_relative '03_data_for_tests'
+
 SYMBOLS = %w[* # + $ @ / % = - & _ £ ^ { ( ) } ! : ;].freeze
 
 # # # PART ONE # # #
@@ -133,6 +135,7 @@ while input.downcase != 'fin'
   input = gets.chomp
 end
 
+puts '-----------'
 puts 'Réponse de la partie 1 :'
 puts calculate_answer1(lines)
 puts '-----------'
@@ -142,4 +145,22 @@ puts 'Réponse de la partie 2 :'
 puts gear_ratios(gears).sum
 puts '-----------'
 
-# wrong => 74804681 (too low)
+# # wrong => 74804681 (too low) || right => 76504829
+
+puts '###### TEST ######'
+puts 'Test with AOC example'
+puts gear_ratios(create_gears(@aoc_example)).sum == @aoc_two
+puts 'Tests with Reddit examples'
+puts gear_ratios(create_gears(@reddit1)).sum == @reddit1_two
+puts gear_ratios(create_gears(@reddit2)).sum == @reddit2_two
+puts 'Tests with my examples'
+puts gear_ratios(create_gears(@mine1)).sum == @mine1_two
+puts gear_ratios(create_gears(@mine2)).sum == @mine2_two
+puts gear_ratios(create_gears(@mine3)).sum == @mine3_two
+puts gear_ratios(create_gears(@mine4)).sum == @mine4_two
+puts gear_ratios(create_gears(@mine5)).sum == @mine5_two
+puts gear_ratios(create_gears(@mine6)).sum == @mine6_two
+puts gear_ratios(create_gears(@mine7)).sum == @mine7_two
+puts gear_ratios(create_gears(@mine8)).sum == @mine8_two
+puts gear_ratios(create_gears(@mine9)).sum == @mine9_two
+puts '-----------'

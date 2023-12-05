@@ -95,7 +95,7 @@ end
 almanac = []
 puts "Entrez les lignes (tapez 'fin' pour terminer la saisie) :"
 seeds_input = gets.chomp
-space = gets.chomp
+gets.chomp
 input = gets.chomp
 
 while input.downcase != 'fin'
