@@ -1,19 +1,54 @@
 # # # PART ONE # # #
 
-# Time:      7  15   30   milliseconds
-# Distance:  9  40  200   millimeters
+# méthode pour créer les courses sour forme de hash
+# entrée => [7, 15, 30], [9, 40, 200]
+# sortie => [{time: 7, distance: 9}, {time: 15, distance: 40}, {time: 30, distance: 200}]
+def create_races(times, distances)
+  races = []
+  grid = [times, distances].transpose
+  grid.each do |race|
+    races << { time: race[0], distance: race[1] }
+  end
+  races
+end
 
-# speed = 0 mm/ms
-# button hold for 1 millisecond => speed += 1 mm/ms
+# méthode pour donner le nombre de possibilités de victoires
+# entrée => {time: 7, distance: 9}
+# sortie => 4
+def number_of_wins(race)
+  count = 0
+  (1...race[:time]).each do |t|
+    count += 1 if t * (race[:time] - t) > race[:distance]
+  end
+  count
+end
 
-# exemple pour la première course
-# tenue du bouton     0   1   2   3   4   5   6   7
-# temps qui reste     7   6   5   4   3   2   1   0
-# distance parcourue  0   6   10  12  12  10  6   0
-# win or loose        -   -   x   x   x   x   -   -     => 4 possibilités
-# réponse => on multiplie le nombre de possibilités de victoire pour chaque course
+# méthode pour calculer le produit final
+# entrée => [4, 8, 9]
+# sortie => 288
+def calculate_ratio(arr)
+  ratio = 1
+  arr.each { |n| ratio *= n }
+  ratio
+end
 
+def answer1(races)
+  w = []
+  races.each { |race| w << number_of_wins(race) }
+  calculate_ratio(w)
+end
 
+# # # PART TWO # # #
+
+# méthode pour créer la course sour forme de hash
+# entrée => [7, 15, 30], [9, 40, 200]
+# sortie => {time: 71530, distance: 940200}
+def create_only_one_race(times, distances)
+  race = {}
+  race[:time] = times.map(&:to_s).join('').to_i
+  race[:distance] = distances.map(&:to_s).join('').to_i
+  race
+end
 
 # # # ANSWERS # # #
 
@@ -25,23 +60,21 @@ def input_to_array(input)
 end
 
 # data from the test
-times = input_to_array("Time:      7  15   30")
-distances = input_to_array("Distance:  9  40  200")
+# times = input_to_array("Time:      7  15   30")
+# distances = input_to_array("Distance:  9  40  200")
 
 # data from the puzzle input
-# times = input_to_array()
-# distances = input_to_array()
+times = input_to_array("Time:        44     89     96     91")
+distances = input_to_array("Distance:   277   1136   1890   1768")
 
-# puts '-----------'
-# puts 'Réponse de la partie 1 :'
+puts '-----------'
+puts 'Réponse de la partie 1 :'
+races = create_races(times, distances)
+answer1 = answer1(races)
+puts answer1
+puts '-----------'
 
-# puts '-----------'
-
-# puts 'Réponse de la partie 2 :'
-
-# puts '-----------'
-
-
-# méthode pour
-# entrée =>
-# sortie =>
+puts 'Réponse de la partie 2 :'
+race = create_only_one_race(times, distances)
+puts number_of_wins(race)
+puts '-----------'
