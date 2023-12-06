@@ -1,6 +1,4 @@
-# frozen_string_literal: true
-
-# # # PART ONE # # #
+# # # PART TWO # # #
 
 # méthode pour récupérer les seeds de départ
 # entrée => "seeds: 79 14 55 13"
@@ -23,32 +21,9 @@ def ranges(paragraph)
   ranges
 end
 
-# méthode pour trouver le nombre associé
-# entrée => 79, { 50 => 98...100, 52 => 50...98 }
-# sortie => 81
-def find_associate_number(start_number, range_of_paragraph)
-  range_of_paragraph.each do |d_r_s, range|
-    return (start_number - range.first + d_r_s) if range.include?(start_number)
-  end
-  start_number
-end
-
-def find_all_locations(seeds, almanac)
-  locations = seeds.dup
-  ranges = almanac.map { |paragraph| ranges(paragraph) }
-  ranges.each do |range|
-    locations.map! do |seed|
-      find_associate_number(seed, range)
-    end
-  end
-  locations
-end
-
-# # # PART TWO # # #
-
-# méthode pour récupérer les seeds dans les range
+# méthode pour récupérer les seeds dans les range dans l'ordre
 # entrée => "seeds: 79 14 55 13"
-# sortie => [79...93, 55...68]
+# sortie => [55...68, 79...93]
 def get_seed_ranges(seeds_input)
   seeds_in_array = get_seeds(seeds_input).map(&:to_i)
   pairs = seeds_in_array.each_slice(2).to_a
@@ -169,12 +144,6 @@ while input.downcase != 'fin'
   input = gets.chomp
 end
 
-puts '-----------'
-# puts 'Réponse de la partie 1 :'
-# seeds = get_seeds(seeds_input)
-# puts find_all_locations(seeds, almanac).min
-# puts '-----------'
-
 puts 'Réponse de la partie 2 :'
 all_seeds = get_seed_ranges(seeds_input)
 almanac_ranges = almanac.map { |paragraph| ranges(paragraph) }
@@ -184,5 +153,3 @@ almanac_ranges.each do |dico_range|
   working_seed = sort_and_collapse(new_ranges)
 end
 puts find_lowest_location(working_seed)
-puts '-----------'
-# wrong = 68608231 is too high

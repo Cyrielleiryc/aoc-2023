@@ -1,18 +1,19 @@
-one_seed = 45...53
-values = [98...100, 50...98, 47...50]
+ranges = [15...30, 25...59, 98...105]
 
-# Initialisation du tableau résultant
-cut_ranges = []
+# Tri des intervalles par leur début
+sorted_ranges = ranges.sort_by(&:first)
 
-# Ajout de la première partie de one_seed
-cut_ranges << (one_seed.first...values[0].first) if one_seed.first < values[0].first
+merged_ranges = [sorted_ranges.first]
 
-# Ajout des plages du tableau values
-values.each_cons(2) do |range1, range2|
-  cut_ranges << (range1.last...range2.first) if range1.last < range2.first
+sorted_ranges[1..-1].each do |current_range|
+  last_merged_range = merged_ranges.last
+
+  if current_range.first <= last_merged_range.last
+    new_range = last_merged_range.first...[last_merged_range.last, current_range.last].max
+    merged_ranges[-1] = new_range
+  else
+    merged_ranges << current_range
+  end
 end
 
-# Vérification pour la dernière plage de values et la fin de one_seed
-cut_ranges << (values[-1].last...one_seed.last) if values[-1].last < one_seed.last
-
-puts cut_ranges.inspect
+merged_ranges
