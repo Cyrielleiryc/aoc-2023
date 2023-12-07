@@ -1,19 +1,24 @@
-ranges = [15...30, 25...59, 98...105]
+CARD_TYPES = {
+  'A' => 14,
+  'K' => 13,
+  'Q' => 12,
+  'J' => 11,
+  'T' => 10,
+  '9' => 9,
+  '8' => 8,
+  '7' => 7,
+  '6' => 6,
+  '5' => 5,
+  '4' => 4,
+  '3' => 3,
+  '2' => 2
+}
 
-# Tri des intervalles par leur début
-sorted_ranges = ranges.sort_by(&:first)
+# arr = ["KK677", "KTJJT", "5588A"]
+arr = ["QQQJA", "T55J5"]
 
-merged_ranges = [sorted_ranges.first]
-
-sorted_ranges[1..-1].each do |current_range|
-  last_merged_range = merged_ranges.last
-
-  if current_range.first <= last_merged_range.last
-    new_range = last_merged_range.first...[last_merged_range.last, current_range.last].max
-    merged_ranges[-1] = new_range
-  else
-    merged_ranges << current_range
-  end
+arr_sorted = arr.sort_by do |item|
+  item.chars.map { |char| CARD_TYPES[char] }
 end
 
-merged_ranges
+p arr_sorted
