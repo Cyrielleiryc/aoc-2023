@@ -1,12 +1,5 @@
 # # # PART ONE # # #
 
-# 32T3K 765 => one pair        => rank 1 => 1 * 765
-# T55J5 684 => three of a kind => rank 4 => 4 * 684
-# KK677 28  => two pairs       => rank 3 => 3 * 28
-# KTJJT 220 => two pairs       => rank 2 => 2 * 220
-# QQQJA 483 => three of a kind => rank 5 => 5 * 483
-# TOTAL = 6440
-
 # cards by order of strength
 CARD_TYPES = {
   'A' => 14,
@@ -138,8 +131,8 @@ end
 # # # ANSWERS # # #
 
 # on récupère les données
-hands = [] # ["32T3K", "T55J5", "KK677", "KTJJT", "QQQJA"]
-bids = []  # [765, 684, 28, 220, 483]
+hands = []
+bids = []
 
 puts "Entrez les lignes (tapez 'fin' pour terminer la saisie) :"
 input = gets.chomp
@@ -157,13 +150,29 @@ hands_score = hands_score(hands)
 hands_in_order = final_order(hands_score)
 puts calculate_total_winnings(hands_with_bids, hands_in_order)
 puts '-----------'
-# wrong = 252068215 (too high)
-
-# puts 'Réponse de la partie 2 :'
-
-# puts '-----------'
+# wrong => 252068215 (too high)
 
 
 # méthode pour
 # entrée =>
 # sortie =>
+reddit_example = %w[
+2345A 2
+Q2Q2Q 13
+2345J 5
+J345A 3
+32T3K 7
+T55J5 19
+KK677 11
+KTJJT 29
+QQQJA 23
+JJJJJ 31
+JAAAA 43
+AAAAJ 53
+AAAAA 59
+2AAAA 17
+2JJJJ 47
+JJJJ2 34
+]
+# Part 1: 4466 => got 3568
+# Part 2: 4657
