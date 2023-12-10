@@ -30,15 +30,6 @@ test2bis = %w[
   LJ.LJ
 ]
 
-=begin
-        | is a vertical pipe connecting north and south
-        - is a horizontal pipe connecting east and west
-        L is a 90-degree bend connecting north and east
-        J is a 90-degree bend connecting north and west
-        7 is a 90-degree bend connecting south and west
-        F is a 90-degree bend connecting south and east
-=end
-
 # méthode pour trouver les coordonnées de S => [x, y]
 # entrée => toutes les lignes sous format [[line1], [line2], etc]
 # sortie => [1, 1] || [0, 2]
@@ -52,18 +43,60 @@ def find_start(tiles)
   end
 end
 
+# méthode pour trouver un caractère à un emplacement donné
+# entrée => toutes les lignes, [x, y]
+# sortie => '-' ou un autre
+def character(lines, coordinates)
+  lines[coordinates[1]][coordinates[0]]
+end
 
+def handle_exceptions(lines, path_ending, antepenultimate, last_x, last_y, above, below, left, right)
+  if path_ending == '||'
+    if antepenultimate[1] > last_y
+      return above if %w[| 7 F].include?(character(lines, above))
+    else
+      return below if %w[| L J].include?(character(lines, below))
+    end
+  else
+    if antepenultimate[0] > last_x
+      return right if %w[- J 7 S].include?(character(lines, right))
+    else
+      return left if %w[- F L S].include?(character(lines, left))
+    end
+  end
+end
 
+# méthode pour donner les coordonnées de la case suivante si c'est possible
+# entrée => lines, antépunultième, avant-dernier, dernier
+# sortie => [next_x, next_y] or nil
+def find_next_tile(lines, antepenultimate, penultimate, last)
+  last_x = last[0]
+  last_y = last[1]
+  above = [last_x, last_y - 1]
+  below = [last_x, last_y + 1]
+  left = [last_x - 1, last_y]
+  right = [last_x + 1, last_y]
+  path_ending = "#{lines[penultimate[1]][penultimate[0]]}#{lines[last_y][last_x]}"
+  case path_ending
+  when '|7' || '|J' || 'J-' || 'J7' || '7-' || 'FJ'
+    return left if %w[- F L S].include?(character(lines, left))
+  when '|L' || '|F' || 'LF' || 'L-' || 'JF' || 'F-' || 'FL'
+    return right if %w[- J 7 S].include?(character(lines, right))
+  when '-7' || '-F' || 'L7' || '7|' || '7F' || 'F|' || 'F7'
+    return below if %w[| L J S].include?(character(lines, below))
+  when '-J' || '-L' || 'LJ' || 'L|' || 'J|' || 'JL' || '7L' || '7J'
+    return above if %w[| 7 F S].include?(character(lines, above))
+  when '||' || '--'
+    handle_exceptions(lines, path_ending, antepenultimate, last_x, last_y, above, below, left, right)
+  end
+end
 
+# méthode pour vérifier si le chemin a fini sa boucle
+def back_to_start?(path)
+  path[0] == path[-1] && path.length > 4
+end
 
-
-
-
-
-
-
-
-
-# méthode pour
-# entrée =>
-# sortie =>
+# def through_the_maze(lines)
+#   start = find_start(lines)
+#   paths = [[start]]
+# end
