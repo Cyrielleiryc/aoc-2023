@@ -152,27 +152,23 @@ puts calculate_total_winnings(hands_with_bids, hands_in_order)
 puts '-----------'
 # wrong => 252068215 (too high)
 
-
-# méthode pour
-# entrée =>
-# sortie =>
-reddit_example = %w[
-2345A 2
-Q2Q2Q 13
-2345J 5
-J345A 3
-32T3K 7
-T55J5 19
-KK677 11
-KTJJT 29
-QQQJA 23
-JJJJJ 31
-JAAAA 43
-AAAAJ 53
-AAAAA 59
-2AAAA 17
-2JJJJ 47
-JJJJ2 34
-]
+# reddit_example = %w[
+# 2345A 2
+# Q2Q2Q 13
+# 2345J 5
+# J345A 3
+# 32T3K 7
+# T55J5 19
+# KK677 11
+# KTJJT 29
+# QQQJA 23
+# JJJJJ 31
+# JAAAA 43
+# AAAAJ 53
+# AAAAA 59
+# 2AAAA 17
+# 2JJJJ 47
+# JJJJ2 34
+# ]
 # Part 1: 4466 => got 3568
 # Part 2: 4657
