@@ -51,18 +51,14 @@ def character(lines, coordinates)
 end
 
 def handle_exceptions(lines, path_ending, antepenultimate, last_x, last_y, above, below, left, right)
-  if path_ending == '||'
-    if antepenultimate[1] > last_y
-      return above if %w[| 7 F].include?(character(lines, above))
-    else
-      return below if %w[| L J].include?(character(lines, below))
-    end
-  else
-    if antepenultimate[0] > last_x
-      return right if %w[- J 7 S].include?(character(lines, right))
-    else
-      return left if %w[- F L S].include?(character(lines, left))
-    end
+  if path_ending == '||' && antepenultimate[1] > last_y
+    return above if %w[| 7 F S].include?(character(lines, above))
+  elsif path_ending == '||' && antepenultimate[1] < last_y
+    return below if %w[| L J S].include?(character(lines, below))
+  elsif path_ending == '--' && antepenultimate[0] > last_x
+    return right if %w[- J 7 S].include?(character(lines, right))
+  elsif path_ending == '--' && antepenultimate[0] < last_x
+    return left if %w[- F L S].include?(character(lines, left))
   end
 end
 
@@ -96,7 +92,13 @@ def back_to_start?(path)
   path[0] == path[-1] && path.length > 4
 end
 
-# def through_the_maze(lines)
-#   start = find_start(lines)
-#   paths = [[start]]
-# end
+def through_the_maze(lines)
+  maze = true
+  start = find_start(lines)
+  paths = [[start]]
+  while maze
+    paths.each do |path|
+      
+    end
+  end
+end
