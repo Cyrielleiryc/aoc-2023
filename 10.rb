@@ -1,6 +1,8 @@
 # # # DATA # # #
+
 # getting the data from the terminal
 lines = []
+
 puts "Entrez les lignes (tapez 'fin' pour terminer la saisie) :"
 input = gets.chomp
 
@@ -85,28 +87,80 @@ def find_next_move(lines, prev_position, actual_x, actual_y)
   end
 end
 
-def answer1(lines)
+def answer1(lines, first_pos)
   start = find_start(lines)
   actual_x = start[0]
   actual_y = start[1]
-  prev_position = 'left'
+  prev_position = first_pos
+  path = {}
   count = 0
   while lines[actual_y][actual_x] != 'S' || count.zero?
     next_move = find_next_move(lines, prev_position, actual_x, actual_y)
     actual_x = next_move[:next_col]
     actual_y = next_move[:next_row]
     prev_position = next_move[:next_dir]
+    if path[actual_y]
+      path[actual_y] << actual_x
+    else
+      path[actual_y] = [actual_x]
+    end
     count += 1
   end
-  count / 2
+  { count: count / 2, path: path }
 end
+# puts answer1(lines, 'top')[:path].to_s
 
 # # # PART TWO # # #
+
+# méthode pour préparer la grille pour la scanner
+def transform_grid(lines, path, new_start)
+  new_grid = lines.dup.map(&:chars)
+  path.each do |key, value|
+    new_grid[key].map!.with_index do |char, index|
+      value.include?(index) ? char : '.'
+    end
+  end
+  start = find_start(lines)
+  new_grid[start[1]][start[0]] = new_start
+  new_grid
+end
+
+# méthode pour compter le nombre de 'inside' sur une ligne ligne
+# entrée => ['.', '.', '.', '.', 'F', '-', 'J', '.', '.', 'F', '7', 'F', 'J', '|', 'L', '7', 'L', '7', 'L', '7']
+# sortie => 2
+def scan_line(line)
+  count = 0
+  in_region = false
+  line.each do |char|
+    if %w[| F 7].include?(char)
+      in_region = !in_region
+    elsif char == '.' && in_region
+      count += 1
+    end
+  end
+  count
+end
+
+# méthode pour scanner le tableau en entier
+def answer2(grid)
+  count = 0
+  grid.each do |line|
+    count += scan_line(line)
+  end
+  count
+end
 
 # # # ANSWERS # # #
 
 puts '-----------'
-puts answer1(lines)
 puts 'Réponse de la partie 1 :'
+answer = answer1(lines, 'right')
+puts answer[:count]
+puts '-----------'
 
-# puts '-----------'
+puts 'Réponse de la partie 2 :'
+path = answer[:path]
+grid = transform_grid(lines, path, '-')
+puts answer2(grid)
+puts '-----------'
+# wrong = 268, 308
