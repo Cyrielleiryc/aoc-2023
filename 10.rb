@@ -112,9 +112,15 @@ end
 
 # # # PART TWO # # #
 
+class Array
+  def deep_dup
+    map { |x| x.is_a?(Array) ? x.deep_dup : x }
+  end
+end
+
 # méthode pour préparer la grille pour la scanner
 def transform_grid(lines, path, new_start)
-  new_grid = lines.dup.map(&:chars)
+  new_grid = lines.deep_dup.map(&:chars)
   path.each do |key, value|
     new_grid[key].map!.with_index do |char, index|
       value.include?(index) ? char : '.'
@@ -126,35 +132,40 @@ def transform_grid(lines, path, new_start)
 end
 
 # méthode pour compter le nombre de 'inside' sur une ligne ligne
-# entrée => ['.', '.', '.', '.', 'F', '-', 'J', '.', '.', 'F', '7', 'F', 'J', '|', 'L', '7', 'L', '7', 'L', '7']
-# sortie => 2
-def scan_line(line)
-  count = 0
+# entrée => ['.', '.', '.', '.', 'F', '-', 'J', '.', '.', 'F', '7', 'F', 'J', '|', 'L', '7', 'L', '7', 'L', '7'], line_index
+# sortie => [[7, line_index], [8, line_index]]
+def scan_line(line, line_index, barreers)
+  tiles_inside = []
   in_region = false
-  line.each do |char|
-    if %w[| F 7].include?(char)
+  line.each_with_index do |char, char_index|
+    if barreers.include?(char)
       in_region = !in_region
     elsif char == '.' && in_region
-      count += 1
+      tiles_inside << [char_index, line_index]
     end
   end
-  count
+  tiles_inside
 end
 
 # méthode pour scanner le tableau en entier
 def answer2(grid)
-  count = 0
-  grid.each do |line|
-    count += scan_line(line)
+  tiles_inside_loop = []
+  grid.each_with_index do |line, line_index|
+    tiles_inside_loop += scan_line(line, line_index, ['|', 'F', '7'])
   end
-  count
+  # puts tiles_inside_loop.to_s
+  # grid.transpose.each_with_index do |line, line_index|
+  #   tiles_inside_loop += scan_line(line, line_index, ['-', 'J', 'L']).map(&:reverse)
+  # end
+  # puts tiles_inside_loop.to_s
+  tiles_inside_loop.uniq.length
 end
 
 # # # ANSWERS # # #
 
 puts '-----------'
 puts 'Réponse de la partie 1 :'
-answer = answer1(lines, 'right')
+answer = answer1(lines, 'left')
 puts answer[:count]
 puts '-----------'
 
