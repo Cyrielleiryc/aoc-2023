@@ -15,18 +15,25 @@ CARD_TYPES = {
   '4' => 4,
   '3' => 3,
   '2' => 2
-}
+}.freeze
+CARD_TYPES2 = {
+  'A' => 14,
+  'K' => 13,
+  'Q' => 12,
+  'T' => 10,
+  '9' => 9,
+  '8' => 8,
+  '7' => 7,
+  '6' => 6,
+  '5' => 5,
+  '4' => 4,
+  '3' => 3,
+  '2' => 2,
+  'J' => 1
+}.freeze
 
-# types by order of strength
-HAND_TYPES = {
-  'five_of_a_kind' => 7,
-  'four_of_a_kind' => 6,
-  'full_house' => 5,
-  'brelan' => 4,
-  'two_pairs' => 3,
-  'one_pair' => 2,
-  'high_card' => 1
-}
+# types by crescent order of strength
+HAND_TYPES = %w[high_card one_pair two_pairs brelan full_house four_of_a_kind five_of_a_kind].freeze
 
 # méthode pour faire correspondre les mains avec leur paris
 # entrée => ["32T3K", "T55J5", "KK677", "KTJJT", "QQQJA"], [765, 684, 28, 220, 483]
@@ -39,16 +46,7 @@ def hands_with_bids(hands, bids)
   hands_with_bids
 end
 
-# méthode pour déterminer si c'est un full house ou un brelan
-# entrée => 'T55J5'  || 'A2A22'
-# sortie => 'brelan' || 'full_house'
-def full_or_brelan(hand)
-  hand.chars.uniq.size == 2 ? 'full_house' : 'brelan'
-end
-
-# méthode pour déterminer si c'est 2 pairs ou 1 pair ou rien
-# entrée => 'KTJJT'     || '32T3K'    || 'KJ84T'
-# sortie => 'two_pairs' || 'one_pair' || 'high_card'
+# méthodes pour donner le type d'une main (et gérer les difficultés)
 def pairs_or_else(hand)
   reduced = hand.chars.uniq.size
   if reduced == 5
@@ -60,9 +58,7 @@ def pairs_or_else(hand)
   end
 end
 
-# méthode pour donner le type d'une main
-# entrée => '32T3K'
-# sortie => 'one_pair'
+MEMOIZED_HANDS = {}
 def hand_type(hand)
   occurences = hand.chars.to_h { |char| [char, hand.count(char)] }
   occurences.each_value do |count|
@@ -72,60 +68,110 @@ def hand_type(hand)
     when 4
       return 'four_of_a_kind'
     when 3
-      return full_or_brelan(hand)
+      return hand.chars.uniq.size == 2 ? 'full_house' : 'brelan'
     end
   end
   pairs_or_else(hand)
 end
 
-# méthode pour donner le score de chaque main
+# méthode pour grouper les mains selon leur type
 # entrée => ['32T3K', 'T55J5', 'KK677', 'KTJJT', 'QQQJA']
-# sortie => {'32T3K'=>2, 'KK677'=>3, 'KTJJT'=>3, 'QQQJA'=>4, 'T55J5'=>4}
-def hands_score(hands)
-  output = {}
+# sortie => {'five_of_a_kind' => [hands], 'four_of_a_kind' => [hands], etc }
+def group_hands(hands)
+  groups = {}
   hands.each do |hand|
-    output[hand] = HAND_TYPES[hand_type(hand)]
+    if MEMOIZED_HANDS[hand]
+      hand_type = MEMOIZED_HANDS[hand]
+    else
+      hand_type = hand_type(hand)
+      MEMOIZED_HANDS[hand] = hand_type
+    end
+    if groups[hand_type]
+      groups[hand_type] << hand
+    else
+      groups[hand_type] = [hand]
+    end
   end
-  output.sort.to_h
+  groups
 end
 
 # méthode pour mettre dans l'ordre les mains identiques
 # entrée => ["KK677", "KTJJT", "5588A"]
 # sortie => ['5588A', 'KTJJT', 'KK677']
-def handle_evens(hands)
+def handle_evens(hands, model_card_types)
   hands.sort_by do |hand|
-    hand.chars.map { |char| CARD_TYPES[char] }
+    hand.chars.map { |char| model_card_types[char] }
   end
 end
 
-# méthode pour donner les mains dans l'ordre final
-# entrée => {'32T3K'=>2, 'KK677'=>3, 'KTJJT'=>3, '5588A'=>3, 'QQQJA'=>4, 'T55J5'=>4}
-# provisoire = [["32T3K"], ["KK677", "KTJJT", "5588A"], ["QQQJA", "T55J5"]]
-# sortie => ['32T3K', '5588A', 'KTJJT', 'KK677', 'T55J5', 'QQQJA']
-def final_order(hands_with_score)
-  grouped = hands_with_score.group_by { |hand, score| score }
-  groups = grouped.values.map { |array| array.map(&:first) }
-  final_order = []
-  groups.each do |group|
-    if group.size == 1
-      final_order << group
+# méthode pour mettre les mains dans l'ordre final
+def hands_in_order(hands_by_groups, model_card_types)
+  order = []
+  HAND_TYPES.each do |hand_type|
+    next unless hands_by_groups[hand_type]
+
+    if hands_by_groups[hand_type].size == 1
+      order << hands_by_groups[hand_type]
     else
-      final_order << handle_evens(group)
+      order << handle_evens(hands_by_groups[hand_type], model_card_types)
     end
   end
-  final_order.flatten
+  order.flatten
 end
 
 # méthode pour calculer les gains pour chaque main
-# entrées => {"32T3K"=>765, "T55J5"=>684, "KK677"=>28, "KTJJT"=>220, "QQQJA"=>483}
-#         => ['32T3K', '5588A', 'KTJJT', 'KK677', 'T55J5', 'QQQJA']
-# sortie => 6440
 def calculate_total_winnings(hands_with_bids, hands_in_order)
   wins = []
   hands_in_order.each_with_index do |hand, index|
     wins << hands_with_bids[hand] * (index + 1)
   end
   wins.sum
+end
+
+def answer1(hands, bids)
+  hands_grouped_by_type = group_hands(hands)
+  hands_in_final_order = hands_in_order(hands_grouped_by_type, CARD_TYPES)
+  hands_with_bids = hands_with_bids(hands, bids)
+  calculate_total_winnings(hands_with_bids, hands_in_final_order)
+end
+
+# # # PART TWO # # #
+
+def handle_joker(hand)
+  return 'five_of_a_kind' if hand == 'JJJJJ'
+  
+  occurences_of_cards = hand.gsub('J', '').chars.to_h { |l| [l, hand.count(l)] }
+  card_value = occurences_of_cards.key(occurences_of_cards.values.max)
+  new_hand = hand.gsub('J', card_value)
+  hand_type(new_hand)
+end
+
+def hand_type2(hand)
+  if hand.include?('J')
+    handle_joker(hand)
+  else
+    hand_type(hand)
+  end
+end
+
+def group_hands2(hands)
+  groups = {}
+  hands.each do |hand|
+    hand_type = hand_type2(hand)
+    if groups[hand_type]
+      groups[hand_type] << hand
+    else
+      groups[hand_type] = [hand]
+    end
+  end
+  groups
+end
+
+def answer2(hands, bids)
+  hands_grouped_by_type = group_hands2(hands)
+  hands_in_final_order = hands_in_order(hands_grouped_by_type, CARD_TYPES2)
+  hands_with_bids = hands_with_bids(hands, bids)
+  calculate_total_winnings(hands_with_bids, hands_in_final_order)
 end
 
 # # # ANSWERS # # #
@@ -145,30 +191,9 @@ end
 
 puts '-----------'
 puts 'Réponse de la partie 1 :'
-hands_with_bids = hands_with_bids(hands, bids)
-hands_score = hands_score(hands)
-hands_in_order = final_order(hands_score)
-puts calculate_total_winnings(hands_with_bids, hands_in_order)
+puts answer1(hands, bids)
 puts '-----------'
-# wrong => 252068215 (too high)
 
-# reddit_example = %w[
-# 2345A 2
-# Q2Q2Q 13
-# 2345J 5
-# J345A 3
-# 32T3K 7
-# T55J5 19
-# KK677 11
-# KTJJT 29
-# QQQJA 23
-# JJJJJ 31
-# JAAAA 43
-# AAAAJ 53
-# AAAAA 59
-# 2AAAA 17
-# 2JJJJ 47
-# JJJJ2 34
-# ]
-# Part 1: 4466 => got 3568
-# Part 2: 4657
+puts 'Réponse de la partie 2 :'
+puts answer2(hands, bids)
+puts '-----------'

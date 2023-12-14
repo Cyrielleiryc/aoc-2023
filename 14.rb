@@ -1,18 +1,5 @@
 # # # PART ONE # # #
 
-test1 = %w[
-  O....#....
-  O.OO#....#
-  .....##...
-  OO.#O....O
-  .O.....O#.
-  O.#..O.#.#
-  ..O..#O..O
-  .......O..
-  #....###..
-  #OO..#....
-]
-
 # méthode pour faire déplacer les O vers la gauche
 TILTED_LINES = {}
 def tilt_line(line)
@@ -118,7 +105,3 @@ puts '-----------'
 puts 'Réponse de la partie 2 :'
 puts answer2(platform, 1000000000)
 puts '-----------'
-
-# méthode pour
-# entrée =>
-# sortie =>
