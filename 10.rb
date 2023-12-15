@@ -182,4 +182,4 @@ path = answer[:path]
 grid = transform_grid(lines, path, '-')
 puts answer2(grid)
 puts '-----------'
-# wrong = 268, 308 || 298 (too high)
+# wrong = 268, 290, 308 || 298 (too high)

@@ -24,9 +24,8 @@ test2_result = 1320
 # entrée => 'HASH' || 'rn=1'
 # sortie => 52     || 30
 def result_algo(algo)
-  ascii_codes = algo.chars.map(&:ord)
   current_value = 0
-  ascii_codes.each do |code|
+  algo.bytes.each do |code|
     dividende = (current_value + code) * 17
     current_value = dividende.remainder(256)
   end
@@ -45,13 +44,14 @@ end
 
 # getting the data from the terminal
 puts "Entrez les lignes (tapez 'entrer' pour terminer la saisie) :"
-sequence = gets.chomp.split(',').map(&:strip)
+sequence = gets.chomp.split(',')
 
 puts '-----------'
 puts 'Réponse de la partie 1 :'
+# puts sequence.length
+# puts sequence.to_s
 puts answer1(sequence)
 puts '-----------'
-# wrong => 90844 (too low)
 
 # puts 'Réponse de la partie 2 :'
 # puts '-----------'
