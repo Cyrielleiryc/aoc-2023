@@ -1,34 +1,20 @@
+require_relative '15_data'
+
+# # # DATA # # #
+
+sequence = @data.split(',')
+
 # # # PART ONE # # #
 
-test1_input = 'HASH'
-test1_seq = ['HASH']
-test1_result = 52
-
-test2_input = 'rn=1,cm-,qp=3,cm=2,qp-,pc=4,ot=9,ab=5,pc-,pc=6,ot=7'
-test2_seq = [
-  'rn=1', # 30
-  'cm-', # 253
-  'qp=3', # 97
-  'cm=2', # 47
-  'qp-', # 14
-  'pc=4', # 180
-  'ot=9', # 9
-  'ab=5', # 197
-  'pc-', # 48
-  'pc=6', # 214
-  'ot=7' # 231
-]
-test2_result = 1320
-
 # méthode pour donner le résultat d'un algo
-# entrée => 'HASH' || 'rn=1'
-# sortie => 52     || 30
+@codes = {} # memoized string and its output
 def result_algo(algo)
   current_value = 0
   algo.bytes.each do |code|
     dividende = (current_value + code) * 17
     current_value = dividende.remainder(256)
   end
+  @codes[algo] = current_value
   current_value
 end
 
@@ -36,26 +22,89 @@ def answer1(sequence)
   sequence.sum { |algo| result_algo(algo) }
 end
 
-# puts answer1(test2_seq)
-
 # # # PART TWO # # #
+
+# méthode pour trouver la position d'une lentille en fonction de l'étiquette
+def find_lense(label, box)
+  i = nil
+  box.each_with_index do |old_lens, index|
+    i = index if old_lens[0] == label
+  end
+  i
+end
+
+# méthode pour gérer le fait que la boite contient déjà des lentilles
+def handle_lenses(lens, box)
+  i = find_lense(lens[0], box)
+  i.nil? ? box << lens : box[i] = lens
+  box
+end
+
+# méthode pour ajouter une lentille
+def add_lens(algo, boxes)
+  lens = [algo.split('=')[0], algo.split('=')[1].to_i]
+  box_number = @codes[lens[0]] || result_algo(lens[0])
+  if boxes[box_number] && boxes[box_number].empty?
+    boxes[box_number] << lens
+  elsif boxes[box_number] && !boxes[box_number].empty?
+    boxes[box_number] = handle_lenses(lens, boxes[box_number])
+  else
+    boxes[box_number] = [lens]
+  end
+  boxes
+end
+
+# méthode pour supprimer une lentille
+def remove_lens(algo, boxes)
+  label = algo.split('-')[0]
+  box_number = @codes[label] || result_algo(label)
+  if boxes[box_number] && find_lense(label, boxes[box_number])
+    boxes[box_number].delete_at(find_lense(label, boxes[box_number]))
+  end
+  boxes
+end
+
+# méthode pour donner le contenu des boites à la fin de l'algorithme
+def steps_of_sequence(sequence)
+  boxes = {}
+  sequence.each do |algo|
+    if algo.include?('=')
+      boxes = add_lens(algo, boxes)
+    else
+      boxes = remove_lens(algo, boxes)
+    end
+  end
+  boxes
+end
+
+# méthode pour calculer le score d'une boîte
+def score_one_box(box_number, lenses)
+  return 0 if lenses.empty?
+
+  score = 0
+  lenses.each_with_index do |lens, index|
+    focusing_pwr = (box_number + 1) * (index + 1) * lens[1]
+    score += focusing_pwr
+  end
+  score
+end
+
+def answer2(sequence)
+  boxes = steps_of_sequence(sequence)
+  final_score = 0
+  boxes.each do |box_number, lenses|
+    final_score += score_one_box(box_number, lenses)
+  end
+  final_score
+end
 
 # # # ANSWERS # # #
 
-# getting the data from the terminal
-puts "Entrez les lignes (tapez 'entrer' pour terminer la saisie) :"
-sequence = gets.chomp.split(',')
-
 puts '-----------'
 puts 'Réponse de la partie 1 :'
-# puts sequence.length
-# puts sequence.to_s
 puts answer1(sequence)
 puts '-----------'
 
-# puts 'Réponse de la partie 2 :'
-# puts '-----------'
-
-# méthode pour
-# entrée =>
-# sortie =>
+puts 'Réponse de la partie 2 :'
+puts answer2(sequence)
+puts '-----------'
