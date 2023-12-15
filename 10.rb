@@ -134,44 +134,52 @@ end
 # méthode pour compter le nombre de 'inside' sur une ligne ligne
 # entrée => ['.', '.', '.', '.', 'F', '-', 'J', '.', '.', 'F', '7', 'F', 'J', '|', 'L', '7', 'L', '7', 'L', '7'], line_index
 # sortie => [[7, line_index], [8, line_index]]
-def scan_line(line, line_index, barreers)
-  tiles_inside = []
+# we count each L----J or F----7 as non existent
+# and each L----7 or F----J as existent region boundary
+def scan_line(line)
+  count = 0
   in_region = false
-  line.each_with_index do |char, char_index|
-    if barreers.include?(char)
+  previous_edge = nil
+  line.each do |char|
+    next if char == '-'
+
+    if char == '|'
       in_region = !in_region
+    elsif ['L', 'F'].include?(char)
+      previous_edge = char
+    elsif char == 'J'
+      in_region = !in_region if previous_edge == 'F'
+      previous_edge = nil
+    elsif char == '7'
+      in_region = !in_region if previous_edge == 'L'
+      previous_edge = nil
     elsif char == '.' && in_region
-      tiles_inside << [char_index, line_index]
+      count += 1
     end
   end
-  tiles_inside
+  count
 end
 
 # méthode pour scanner le tableau en entier
 def answer2(grid)
   tiles_inside_loop = []
-  grid.each_with_index do |line, line_index|
-    tiles_inside_loop += scan_line(line, line_index, ['|', 'F', '7'])
+  grid.each do |line|
+    tiles_inside_loop << scan_line(line)
   end
-  # puts tiles_inside_loop.to_s
-  # grid.transpose.each_with_index do |line, line_index|
-  #   tiles_inside_loop += scan_line(line, line_index, ['-', 'J', 'L']).map(&:reverse)
-  # end
-  # puts tiles_inside_loop.to_s
-  tiles_inside_loop.uniq.length
+  tiles_inside_loop.sum
 end
 
 # # # ANSWERS # # #
 
 puts '-----------'
-puts 'Réponse de la partie 1 :'
+# puts 'Réponse de la partie 1 :'
 answer = answer1(lines, 'left')
-puts answer[:count]
-puts '-----------'
+# puts answer[:count]
+# puts '-----------'
 
 puts 'Réponse de la partie 2 :'
 path = answer[:path]
 grid = transform_grid(lines, path, '-')
 puts answer2(grid)
 puts '-----------'
-# wrong = 268, 308
+# wrong = 268, 308 || 298 (too high)

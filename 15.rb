@@ -34,7 +34,7 @@ def result_algo(algo)
 end
 
 def answer1(sequence)
-  sequence.map { |algo| result_algo(algo) }.sum
+  sequence.sum { |algo| result_algo(algo) }
 end
 
 # puts answer1(test2_seq)
