@@ -46,16 +46,17 @@ test_digplan = [
   ['U', 2]
 ]
 test_terrain = [
-  ['#', '#', '#', '#', '#', '#', '#'],
+  ['#', '#', '#', '#', '#', '#', '#'], # 0
   ['#', '.', '.', '.', '.', '.', '#'],
   ['#', '#', '#', '.', '.', '.', '#'],
-  ['.', '.', '#', '.', '.', '.', '#'],
+  ['.', '.', '#', '.', '.', '.', '#'], # 3
   ['.', '.', '#', '.', '.', '.', '#'],
   ['#', '#', '#', '.', '#', '#', '#'],
-  ['#', '.', '.', '.', '#', '.', '.'],
+  ['#', '.', '.', '.', '#', '.', '.'], # 6
   ['#', '#', '.', '.', '#', '#', '#'],
   ['.', '#', '.', '.', '.', '.', '#'],
-  ['.', '#', '#', '#', '#', '#', '#']
+  ['.', '#', '#', '#', '#', '#', '#'] # 9
+  # 0         2         4         6
 ]
 test_terrain_int = [
   ['#', '#', '#', '#', '#', '#', '#'],
@@ -68,6 +69,9 @@ test_terrain_int = [
   ['#', '#', '#', '#', '#', '#', '#'],
   ['.', '#', '#', '#', '#', '#', '#'],
   ['.', '#', '#', '#', '#', '#', '#']
+]
+test_vertices = [
+  [0, 0], [6, 0], [6, 5], [4, 5], [4, 7], [6, 7], [6, 9], [1, 9], [1, 7], [0, 7], [0, 5], [2, 5], [2, 2], [0, 2], [0, 0]
 ]
 
 # # # PART ONE # # #
@@ -133,17 +137,80 @@ def one_step(terrain, stage)
     terrain[position[1]][position[0]] = '#'
   end
   terrain[position[1]][position[0]] = 'P'
-  terrain
+  { terr: terrain, pos: position }
+end
+
+def one_step2(last_pos, stage)
+  case stage[0]
+  when 'U'
+    return [last_pos[0], last_pos[1] - stage[1]]
+  when 'D'
+    return [last_pos[0], last_pos[1] + stage[1]]
+  when 'L'
+    return [last_pos[0] - stage[1], last_pos[1]]
+  when 'R'
+    return [last_pos[0] + stage[1], last_pos[1]]
+  end
 end
 
 def follow_plan(digplan)
   terrain = [['P']]
+  vertices = []
   digplan.each do |stage|
-    terrain = one_step(terrain, stage)
+    after_one_step = one_step(terrain, stage)
+    terrain = after_one_step[:terr]
+    vertices << after_one_step[:pos]
   end
   last_position = find_position(terrain)
   terrain[last_position[1]][last_position[0]] = '#'
-  terrain
+  { terr: terrain, vertices: vertices }
+end
+
+def follow_plan2(digplan)
+  pos = [0, 0]
+  corners = [pos]
+  digplan.each do |stage|
+    pos = one_step2(pos, stage)
+    corners << pos
+  end
+  corners
+end
+
+# méthodes pour calculer l'aire total
+def shoelace_formula(vertices)
+  total = 0
+  i = 0
+  while i < vertices[0].length - 1
+    total += (vertices[0][i] * vertices[1][i + 1])
+    total -= (vertices[1][i] * vertices[0][i + 1])
+    i += 1
+  end
+  total / 2
+end
+
+def perimeter(terrain)
+  count = 0
+  terrain.each do |line|
+    next unless line.include?('#')
+
+    line.each do |char|
+      next unless char == '#'
+
+      count += 1
+    end
+  end
+  count
+end
+
+def perimeter2(digplan)
+  digplan.sum { |stage| stage[1] }
+end
+
+def answer1(digplan)
+  vertices = follow_plan2(digplan)
+  aera = shoelace_formula(vertices.transpose)
+  demi_perimeter = perimeter2(digplan) / 2
+  aera + demi_perimeter + 1
 end
 
 # # # PART TWO # # #
@@ -152,6 +219,7 @@ end
 
 # puts '-----------'
 # puts 'Réponse de la partie 1 :'
+# puts answer1(digplan)
 # puts '-----------'
 
 # puts 'Réponse de la partie 2 :'
