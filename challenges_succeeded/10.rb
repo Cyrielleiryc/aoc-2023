@@ -34,8 +34,6 @@ POSSIBLE_DIRECTIONS = {
 # # # PART ONE # # #
 
 # méthode pour trouver les coordonnées de S => [x, y]
-# entrée => toutes les lignes sous format [[line1], [line2], etc]
-# sortie => [1, 1] || [0, 2]
 def find_start(tiles)
   tiles.each_with_index do |tile, y|
     next unless tile.include?('S')
@@ -92,94 +90,57 @@ def answer1(lines, first_pos)
   actual_x = start[0]
   actual_y = start[1]
   prev_position = first_pos
-  path = {}
+  path = []
   count = 0
   while lines[actual_y][actual_x] != 'S' || count.zero?
     next_move = find_next_move(lines, prev_position, actual_x, actual_y)
     actual_x = next_move[:next_col]
     actual_y = next_move[:next_row]
     prev_position = next_move[:next_dir]
-    if path[actual_y]
-      path[actual_y] << actual_x
-    else
-      path[actual_y] = [actual_x]
-    end
+    path << [actual_x, actual_y]
     count += 1
   end
   { count: count / 2, path: path }
 end
-# puts answer1(lines, 'top')[:path].to_s
 
 # # # PART TWO # # #
 
-class Array
-  def deep_dup
-    map { |x| x.is_a?(Array) ? x.deep_dup : x }
+def shoelace_formula(vertices)
+  total = 0
+  i = 0
+  while i < vertices[0].length - 1
+    total += (vertices[0][i] * vertices[1][i + 1])
+    total -= (vertices[1][i] * vertices[0][i + 1])
+    i += 1
   end
+  total / 2
 end
 
-# méthode pour préparer la grille pour la scanner
-def transform_grid(lines, path, new_start)
-  new_grid = lines.deep_dup.map(&:chars)
-  path.each do |key, value|
-    new_grid[key].map!.with_index do |char, index|
-      value.include?(index) ? char : '.'
-    end
+def vertices(lines, path)
+  vertices = [path[-1]]
+  path.each do |pos|
+    char = lines[pos[1]][pos[0]]
+    vertices << pos if %w[S 7 F L J].include?(char)
   end
-  start = find_start(lines)
-  new_grid[start[1]][start[0]] = new_start
-  new_grid
+  vertices
 end
 
-# méthode pour compter le nombre de 'inside' sur une ligne ligne
-# entrée => ['.', '.', '.', '.', 'F', '-', 'J', '.', '.', 'F', '7', 'F', 'J', '|', 'L', '7', 'L', '7', 'L', '7'], line_index
-# sortie => [[7, line_index], [8, line_index]]
-# we count each L----J or F----7 as non existent
-# and each L----7 or F----J as existent region boundary
-def scan_line(line)
-  count = 0
-  in_region = false
-  previous_edge = nil
-  line.each do |char|
-    next if char == '-'
-
-    if char == '|'
-      in_region = !in_region
-    elsif ['L', 'F'].include?(char)
-      previous_edge = char
-    elsif char == 'J'
-      in_region = !in_region if previous_edge == 'F'
-      previous_edge = nil
-    elsif char == '7'
-      in_region = !in_region if previous_edge == 'L'
-      previous_edge = nil
-    elsif char == '.' && in_region
-      count += 1
-    end
-  end
-  count
-end
-
-# méthode pour scanner le tableau en entier
-def answer2(grid)
-  tiles_inside_loop = []
-  grid.each do |line|
-    tiles_inside_loop << scan_line(line)
-  end
-  tiles_inside_loop.sum
+def answer2(lines, path)
+  demi_perimeter = path.length / 2
+  vertices = vertices(lines, path)
+  aera = shoelace_formula(vertices.transpose)
+  aera.abs - demi_perimeter + 1
 end
 
 # # # ANSWERS # # #
 
 puts '-----------'
-# puts 'Réponse de la partie 1 :'
+puts 'Réponse de la partie 1 :'
 answer = answer1(lines, 'left')
-# puts answer[:count]
-# puts '-----------'
+puts answer[:count]
+puts '-----------'
 
 puts 'Réponse de la partie 2 :'
 path = answer[:path]
-grid = transform_grid(lines, path, '-')
-puts answer2(grid)
+puts answer2(lines, path)
 puts '-----------'
-# wrong = 250, 268, 290, 294, 308 || 298 (too high)
