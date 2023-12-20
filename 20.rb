@@ -152,15 +152,59 @@ end
 
 # # # PART TWO # # #
 
+def check_for_rx(outputs)
+  new_outputs = []
+  outputs.each do |output|
+    if output[1] == 'rx' && output[0] == 'low'
+      return 'stop'
+    elsif output[1] != 'rx' && output[1] != 'output'
+      new_outputs << output
+    end
+  end
+  new_outputs
+end
+
+# méthode pour appuyer sur le bouton
+def push_button2(config)
+  outputs = broadcaster('low', config['broadcaster'], 'broadcaster')
+  until outputs.empty?
+    new_outputs = []
+    outputs.each do |output|
+      module_type = config[output[1]][:type]
+      if module_type == '%'
+        fliflop_output = flipflop(output[0], config[output[1]], output[1])
+        new_outputs += fliflop_output if fliflop_output
+      elsif module_type == '&'
+        new_outputs += conjunction(output[0], config[output[1]], output[1], output[2])
+      end
+    end
+    outputs = check_for_rx(new_outputs)
+    return 'stop' if outputs == 'stop'
+  end
+  config
+end
+
+def answer2(config)
+  create_keys(config)
+  i = 0
+  button_pushed = push_button2(config)
+  until button_pushed == 'stop'
+    i += 1
+    button_pushed = push_button2(button_pushed)
+  end
+  i
+end
+
 # # # ANSWERS # # #
 
-puts '-----------'
-puts 'Réponse de la partie 1 :'
-puts answer1(config, 1000)
+# puts '-----------'
+# puts 'Réponse de la partie 1 :'
+# puts answer1(config, 1000)
 puts '-----------'
 
-# puts 'Réponse de la partie 2 :'
-# puts '-----------'
+puts 'Réponse de la partie 2 :'
+puts answer2(config)
+puts '-----------'
 
 # méthode pour
 # entrée =>
