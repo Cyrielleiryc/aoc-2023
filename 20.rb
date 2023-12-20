@@ -25,12 +25,6 @@
 #       => was on?          => low
 #         off + low     otherwise => high
 
-# explication de la mémoire des conjunctions
-# au départ => [['low'], ['low']]
-# on appuie sur le bouton => on supprime la première mémoire, on rajoute une mémoire vide
-# avant de recevoir les pulses => [['low'], []]
-# lorsqu'on reçoit un pulse, on regarde la mémoire du premier tableau, on met à jour la mémoire du 2e tableau
-
 test1_config = {
   'broadcaster' => { type: 'broadcaster', dest: ['a', 'b', 'c'] },
   'a' => { type: '%', dest: ['b'], status: 'off' },
@@ -42,10 +36,19 @@ test1_config = {
 test2_config = {
   'broadcaster' => { type: 'broadcaster', dest: ['a'] },
   'a' => { type: '%', dest: ['inv', 'con'], status: 'off' },
-  'inv' => { type: '&', dest: ['b'], memory: [['low'], ['low']] },
+  'inv' => { type: '&', dest: ['b'], memory: [] },
   'b' => { type: '%', dest: ['con'], status: 'off' },
-  'con' => { type: '&', dest: ['output'], memory: [['low'], ['low']] }
+  'con' => { type: '&', dest: ['output'], memory: [] }
 }
+
+# bc => low => a (off>on) => high => inv (H) => low => b (off>on) => high => con (H, H) => low => output
+#                            high => con (H) => low => output
+# bc => low => a (on>off) => low => inv (H | L) => high => b
+#                            low => con (H, H | L) => high => output
+# bc => low => a (off>on) => high => inv (H | L | H) => low => b (on>off) => low => con (H, H | L | H, L) => high => output
+#                            high => con (H, H | L | H) => low => output
+# bc => low => a (on>off) => low => inv (H | L | H | L ) => high => b
+#                            low => con (H, H | L | H, L | L ) => high => output
 
 # # # PART ONE # # #
 
@@ -79,40 +82,41 @@ def flipflop(pulse, object)
   create_output(new_pulse, object[:dest])
 end
 
-def update_conjunctions(config)
-  config.each_value do |object|
-    next unless object[:type] == '&'
-
-    object[:memory].delete_at(0)
-    object[:memory] << []
-  end
-end
-
 # méthode pour passer un conjunction
 # entrée => 'high', { type: '&', dest: ['a'], memory: [['low'], []] }
 # sortie => [['low', 'a']]
 def conjunction(pulse, object)
-  puts object.to_s
-  all_high_pulses = !object[:memory][0].include?('low')
-  puts "all high? => #{all_high_pulses}"
+  object[:memory] << pulse
+  all_high_pulses = !object[:memory].include?('low')
   new_pulse = all_high_pulses ? 'low' : 'high'
-  puts new_pulse
-  object[:memory][1] << pulse
-  puts object.to_s
   create_output(new_pulse, object[:dest])
 end
-# update_conjunctions(test2_config)
-# update_conjunctions(test2_config)
-# puts conjunction('high', test2_config['inv']).to_s
+
+def update_conjunctions(config)
+  config.each_value do |object|
+    next unless object[:type] == '&'
+
+    # object[:memory].delete_at(0)
+    # object[:memory] << []
+    object[:memory] = []
+  end
+end
+
+def how_many(filter, outputs)
+  outputs.select { |output| output[0] == filter }.length
+end
 
 # méthode pour appuyer sur le bouton
-# entrée => config
-# sortie => config
 def push_button(config)
-  update_conjunctions(config)
+  # puts "THE BUTTON IS PUSHED AND SENDS A LOW PULSE"
   outputs = broadcaster('low', config['broadcaster'])
+  # puts outputs.to_s
+  lows = how_many('low', outputs) + 1
+  highs = how_many('high', outputs)
   until outputs.empty?
-    puts outputs.to_s
+    # puts "##################################"
+    # puts config.to_s
+    # puts "//////////////////////////////////"
     new_outputs = []
     outputs.each do |output|
       module_type = config[output[1]][:type]
@@ -123,11 +127,35 @@ def push_button(config)
         new_outputs += conjunction(output[0], config[output[1]])
       end
     end
-    update_conjunctions(config)
-    outputs = new_outputs
+    lows += how_many('low', new_outputs)
+    highs += how_many('high', new_outputs)
+    # puts new_outputs.to_s
+    outputs = new_outputs.reject { |output| output[1] == 'output' }
   end
+  update_conjunctions(config)
+  { lows: lows, highs: highs }
 end
-push_button(test2_config)
+# puts push_button(test2_config).to_s
+# puts push_button(test2_config).to_s
+
+def answer1(config, number)
+  lows = 0
+  highs = 0
+  # config.each do |key, value|
+  #   puts "#{key} => #{value.to_s}"
+  # end
+  number.times do
+    button_pushed = push_button(config)
+    lows += button_pushed[:lows]
+    highs += button_pushed[:highs]
+    # puts "##################################"
+    # config.each do |key, value|
+    #   puts "#{key} => #{value.to_s}"
+    # end
+  end
+  lows * highs
+end
+# puts answer1(test2_config, 2)
 
 # # # PART TWO # # #
 
