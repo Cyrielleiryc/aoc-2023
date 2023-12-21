@@ -3,21 +3,6 @@ require_relative '20_data'
 # # # DATA # # #
 
 config = {}
-# puts "Entrez les lignes (tapez 'fin' pour terminer la saisie) :"
-# input = gets.chomp
-
-# while input.downcase != 'fin'
-#   pieces = input.split(' -> ')
-#   destinations = pieces[1].split(',').map(&:strip)
-#   if pieces[0] == 'broadcaster'
-#     config['broadcaster'] = { type: 'broadcaster', dest: destinations }
-#   elsif pieces[0][0] == '%'
-#     config[pieces[0][1..]] = { type: '%', dest: destinations, status: 'off' }
-#   elsif pieces[0][0] == '&'
-#     config[pieces[0][1..]] = { type: '&', dest: destinations, state: {} }
-#   end
-#   input = gets.chomp
-# end
 
 @data.each do |line|
   pieces = line.split(' -> ')
@@ -30,30 +15,6 @@ config = {}
     config[pieces[0][1..]] = { type: '&', dest: destinations, state: {} }
   end
 end
-
-#   flip-flop %         conjunction &             broadcaster     button
-#   initially off       memory = low
-#   high => nothing     high => memory += high    high => high    low to broad
-#   low => was off?     low => memory += low      low => low
-#         on + high     if memory all high
-#       => was on?          => low
-#         off + low     otherwise => high
-
-test1_config = {
-  'broadcaster' => { type: 'broadcaster', dest: ['a', 'b', 'c'] },
-  'a' => { type: '%', dest: ['b'], status: 'off' },
-  'b' => { type: '%', dest: ['c'], status: 'off' },
-  'c' => { type: '%', dest: ['inv'], status: 'off' },
-  'inv' => { type: '&', dest: ['a'], state: {} }
-}
-
-test2_config = {
-  'broadcaster' => { type: 'broadcaster', dest: ['a'] },
-  'a' => { type: '%', dest: ['inv', 'con'], status: 'off' },
-  'inv' => { type: '&', dest: ['b'], state: {} },
-  'b' => { type: '%', dest: ['con'], status: 'off' },
-  'con' => { type: '&', dest: ['output'], state: {} }
-}
 
 # # # PART ONE # # #
 
@@ -75,7 +36,7 @@ def create_keys(config)
     end
   end
 end
-create_keys(config)
+# create_keys(config)
 
 # méthode commune pour donner les sorties du module
 def create_output(pulse, destinations, name)
@@ -119,8 +80,16 @@ def check_for_inexistant_modules(outputs, names_list)
   end
 end
 
+def update_rm_inputs(rm_inputs, outputs)
+  outputs.each do |output|
+    next unless output[1] == 'rm'
+
+    rm_inputs[output[2]] = 'high' if output[0] == 'high'
+  end
+end
+
 # méthode pour appuyer sur le bouton
-def push_button(config, names_list)
+def push_button(config, names_list, rm_inputs)
   outputs = broadcaster('low', config['broadcaster'], 'broadcaster')
   lows = how_many('low', outputs) + 1
   highs = how_many('high', outputs)
@@ -137,10 +106,11 @@ def push_button(config, names_list)
     end
     lows += how_many('low', new_outputs)
     highs += how_many('high', new_outputs)
+    update_rm_inputs(rm_inputs, new_outputs)
     new_outputs = check_for_inexistant_modules(new_outputs, names_list)
     outputs = new_outputs.reject { |output| output[1] == 'output' }
   end
-  { lows: lows, highs: highs }
+  { lows: lows, highs: highs, rm: rm_inputs }
 end
 
 def answer1(config, number)
@@ -148,71 +118,42 @@ def answer1(config, number)
   names_list = config.keys
   lows = 0
   highs = 0
+  rm_inputs = { 'dh' => 'low', 'qd' => 'low', 'bb' => 'low', 'dp' => 'low' }
   number.times do
-    button_pushed = push_button(config, names_list)
+    button_pushed = push_button(config, names_list, rm_inputs)
     lows += button_pushed[:lows]
     highs += button_pushed[:highs]
   end
+  puts rm_inputs.to_s
   lows * highs
 end
 
 # # # PART TWO # # #
 
-first_outputs = [
-  ['low', 'np', 'broadcaster'],
-  ['low', 'mg', 'broadcaster'],
-  ['low', 'vd', 'broadcaster'],
-  ['low', 'xr', 'broadcaster']
-]
-
-def check_for_rx(outputs)
-  new_outputs = []
-  outputs.each do |output|
-    if output[1] == 'rx' && output[0] == 'low'
-      return 'stop'
-    elsif output[1] != 'rx' && output[1] != 'output'
-      new_outputs << output
-    end
+def answer2(config)
+  create_keys(config)
+  names_list = config.keys
+  rm_inputs = { 'dh' => 'low', 'qd' => 'low', 'bb' => 'low', 'dp' => 'low' }
+  i = 0
+  until rm_inputs['dp'] == 'high'
+    push_button(config, names_list, rm_inputs)
+    i += 1
   end
-  new_outputs
-end
-
-# méthode pour appuyer sur le bouton et observer un côté de la boucle
-def push_button2(config, index)
-  outputs = broadcaster('low', config['broadcaster'], 'broadcaster')
-  # outputs[0] = ['low', 'np', 'broadcaster']
-  outputs = [outputs[index]]
-  until outputs.empty?
-    new_outputs = []
-    outputs.each do |output|
-      module_type = config[output[1]][:type]
-      if module_type == '%'
-        fliflop_output = flipflop(output[0], config[output[1]], output[1])
-        new_outputs += fliflop_output if fliflop_output
-      elsif module_type == '&'
-        new_outputs += conjunction(output[0], config[output[1]], output[1], output[2])
-      end
-    end
-    outputs = check_for_rx(new_outputs)
-    return 'stop' if outputs == 'stop'
-  end
-  config
-end
-5000.times do
-  result = push_button2(config, 0)
-  puts result.keys.to_s || result
+  i
 end
 
 # # # ANSWERS # # #
 
-# puts '-----------'
-# puts 'Réponse de la partie 1 :'
-# puts answer1(config, 1)
-# puts '-----------'
+puts '-----------'
+puts 'Réponse de la partie 1 :'
+puts answer1(config, 2000)
+puts '-----------'
 
-# puts 'Réponse de la partie 2 :'
-# puts '-----------'
-
-# méthode pour
-# entrée =>
-# sortie =>
+puts 'Réponse de la partie 2 :'
+puts answer2(config)
+# dh = 3877
+# qd = 4001
+# bb = 3907
+# dp = 4027
+# lcm with the 4 numbers above
+puts '-----------'

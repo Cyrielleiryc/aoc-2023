@@ -1,13 +1,13 @@
 # # # DATA # # #
 
-# map = []
-# puts "Entrez les lignes (tapez 'fin' pour terminer la saisie) :"
-# input = gets.chomp
+map = []
+puts "Entrez les lignes (tapez 'fin' pour terminer la saisie) :"
+input = gets.chomp
 
-# while input.downcase != 'fin'
-#   map << input
-#   input = gets.chomp
-# end
+while input.downcase != 'fin'
+  map << input
+  input = gets.chomp
+end
 
 test_map = [
   '...........',
@@ -46,16 +46,12 @@ def next_tiles(pos, map)
   x_max = map[0].length - 1
   y_max = map.length - 1
   next_tiles = []
-  # left
-  next_tiles << [x - 1, y] if !x.zero? && map[y][x - 1] == '.'
-  # right
-  next_tiles << [x + 1, y] if x != x_max && map[y][x + 1] == '.'
-  # top
-  next_tiles << [x, y - 1] if !y.zero? && map[y - 1][x] == '.'
-  # bottom
-  next_tiles << [x, y + 1] if y != y_max && map[y + 1][x] == '.'
+  next_tiles << [x - 1, y] if !x.zero? && map[y][x - 1] == '.' # && !@m_next_tiles.keys.include?([x - 1, y])
+  next_tiles << [x + 1, y] if x != x_max && map[y][x + 1] == '.' # && !@m_next_tiles.keys.include?([x + 1, y])
+  next_tiles << [x, y - 1] if !y.zero? && map[y - 1][x] == '.' # && !@m_next_tiles.keys.include?([x, y - 1])
+  next_tiles << [x, y + 1] if y != y_max && map[y + 1][x] == '.' # && !@m_next_tiles.keys.include?([x, y + 1])
   @m_next_tiles[pos] = next_tiles
-  next_tiles
+  next_tiles.reject { |tile| @m_next_tiles.keys.include?(tile) }
 end
 
 # méthode pour trouver toutes les possibilités pour un pas
@@ -71,20 +67,30 @@ end
 def answer1(map, steps)
   start = start(map)
   pos = [start]
-  steps.times do
+  evens = [start]
+  odds = []
+  steps.times do |i|
     pos = one_step(pos, map)
+    if (i + 1).even?
+      evens += pos
+    else
+      odds += pos
+    end
   end
-  pos.length
+  return evens.length if steps.even?
+  return odds.length if steps.odd?
 end
+
 
 # # # PART TWO # # #
 
 # # # ANSWERS # # #
 
-# puts '-----------'
-# puts 'Réponse de la partie 1 :'
-# puts answer1(map, 64)
-# puts '-----------'
+puts '-----------'
+puts 'Réponse de la partie 1 :'
+puts answer1(map, 64)
+# puts answer1(test_map, 6)
+puts '-----------'
 
 # puts 'Réponse de la partie 2 :'
 # puts '-----------'
