@@ -1,12 +1,11 @@
 # # # DATA # # #
 
-# digplan = []
+# data = []
 # puts "Entrez les lignes (tapez 'fin' pour terminer la saisie) :"
 # input = gets.chomp
 
 # while input.downcase != 'fin'
-#   digplan << input
-#   colors << input.split(' ')[-1].gsub('(', '').gsub(')', '')
+#   data << input
 #   input = gets.chomp
 # end
 

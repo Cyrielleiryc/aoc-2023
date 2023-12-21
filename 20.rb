@@ -1,11 +1,26 @@
+require_relative '20_data'
+
 # # # DATA # # #
 
 config = {}
-puts "Entrez les lignes (tapez 'fin' pour terminer la saisie) :"
-input = gets.chomp
+# puts "Entrez les lignes (tapez 'fin' pour terminer la saisie) :"
+# input = gets.chomp
 
-while input.downcase != 'fin'
-  pieces = input.split(' -> ')
+# while input.downcase != 'fin'
+#   pieces = input.split(' -> ')
+#   destinations = pieces[1].split(',').map(&:strip)
+#   if pieces[0] == 'broadcaster'
+#     config['broadcaster'] = { type: 'broadcaster', dest: destinations }
+#   elsif pieces[0][0] == '%'
+#     config[pieces[0][1..]] = { type: '%', dest: destinations, status: 'off' }
+#   elsif pieces[0][0] == '&'
+#     config[pieces[0][1..]] = { type: '&', dest: destinations, state: {} }
+#   end
+#   input = gets.chomp
+# end
+
+@data.each do |line|
+  pieces = line.split(' -> ')
   destinations = pieces[1].split(',').map(&:strip)
   if pieces[0] == 'broadcaster'
     config['broadcaster'] = { type: 'broadcaster', dest: destinations }
@@ -14,7 +29,6 @@ while input.downcase != 'fin'
   elsif pieces[0][0] == '&'
     config[pieces[0][1..]] = { type: '&', dest: destinations, state: {} }
   end
-  input = gets.chomp
 end
 
 #   flip-flop %         conjunction &             broadcaster     button
@@ -41,15 +55,6 @@ test2_config = {
   'con' => { type: '&', dest: ['output'], state: {} }
 }
 
-# bc => low => a (off>on) => high => inv (H) => low => b (off>on) => high => con (H, H) => low => output
-#                            high => con (H, L) => high => output
-# bc => low => a (on>off) => low => inv (L) => high => b
-#                            low => con (L, L) => high => output
-# bc => low => a (off>on) => high => inv (H) => low => b (on>off) => low => con (L, L) => high => output
-#                            high => con (L, L) => low => output
-# bc => low => a (on>off) => low => inv (L) => high => b
-#                            low => con (L, L) => high => output
-
 # # # PART ONE # # #
 
 # méthode pour préparer les clés du state des conjunction modules
@@ -70,6 +75,7 @@ def create_keys(config)
     end
   end
 end
+create_keys(config)
 
 # méthode commune pour donner les sorties du module
 def create_output(pulse, destinations, name)
@@ -152,6 +158,13 @@ end
 
 # # # PART TWO # # #
 
+first_outputs = [
+  ['low', 'np', 'broadcaster'],
+  ['low', 'mg', 'broadcaster'],
+  ['low', 'vd', 'broadcaster'],
+  ['low', 'xr', 'broadcaster']
+]
+
 def check_for_rx(outputs)
   new_outputs = []
   outputs.each do |output|
@@ -164,9 +177,11 @@ def check_for_rx(outputs)
   new_outputs
 end
 
-# méthode pour appuyer sur le bouton
-def push_button2(config)
+# méthode pour appuyer sur le bouton et observer un côté de la boucle
+def push_button2(config, index)
   outputs = broadcaster('low', config['broadcaster'], 'broadcaster')
+  # outputs[0] = ['low', 'np', 'broadcaster']
+  outputs = [outputs[index]]
   until outputs.empty?
     new_outputs = []
     outputs.each do |output|
@@ -183,28 +198,20 @@ def push_button2(config)
   end
   config
 end
-
-def answer2(config)
-  create_keys(config)
-  i = 0
-  button_pushed = push_button2(config)
-  until button_pushed == 'stop'
-    i += 1
-    button_pushed = push_button2(button_pushed)
-  end
-  i
+5000.times do
+  result = push_button2(config, 0)
+  puts result.keys.to_s || result
 end
 
 # # # ANSWERS # # #
 
 # puts '-----------'
 # puts 'Réponse de la partie 1 :'
-# puts answer1(config, 1000)
-puts '-----------'
+# puts answer1(config, 1)
+# puts '-----------'
 
-puts 'Réponse de la partie 2 :'
-puts answer2(config)
-puts '-----------'
+# puts 'Réponse de la partie 2 :'
+# puts '-----------'
 
 # méthode pour
 # entrée =>
