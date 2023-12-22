@@ -1,4 +1,15 @@
-# # # PART ONE # # #
+# # # DATA # # #
+
+all_rows = []
+puts "Entrez les lignes (tapez 'fin' pour terminer la saisie) :"
+input = gets.chomp
+
+while input.downcase != 'fin'
+  input_split = input.split(' ')
+  contiguous = input_split[1].split(',').map(&:to_i)
+  all_rows << [input_split[0], contiguous]
+  input = gets.chomp
+end
 
 test1 = [
   '???.### 1,1,3',
@@ -8,7 +19,14 @@ test1 = [
   '????.######..#####. 1,6,5',
   '?###???????? 3,2,1'
 ]
-test1lines = ["???.###", ".??..??...?##.", "?#?#?#?#?#?#?#?", "????.#...#...", "????.######..#####.", "?###????????"]
+test1lines = [
+  '???.###',
+  '.??..??...?##.',
+  '?#?#?#?#?#?#?#?',
+  '????.#...#...',
+  '????.######..#####.',
+  '?###????????'
+]
 test1contiguous = [[1, 1, 3], [1, 1, 3], [1, 3, 1, 6], [4, 1, 1], [1, 6, 5], [3, 2, 1]]
 results1 = [
   1,
@@ -19,19 +37,7 @@ results1 = [
   10
 ] # sum = 21
 
-# méthode pour récupérer deux tableaux :
-# ["???.###", ".??..??...?##.", "?#?#?#?#?#?#?#?", "????.#...#...", "????.######..#####.", "?###????????"],
-# [[1, 1, 3], [1, 1, 3], [1, 3, 1, 6], [4, 1, 1], [1, 6, 5], [3, 2, 1]]
-def separate_data(rows)
-  lines = []
-  contiguous = []
-  rows.each do |row|
-    blocks = row.split(' ')
-    lines << blocks[0]
-    contiguous << blocks[1].split(',').map(&:to_i)
-  end
-  [lines, contiguous]
-end
+# # # PART ONE # # #
 
 # méthode pour dire combien de '#' il manque dans la string
 def missing_damaged(str, arr)
@@ -44,85 +50,53 @@ def valid_arrangement?(str, arr)
   str_split == arr
 end
 
-# méthode pour casser la string en sous-groupes
-# entrée => "???.###" || ".??..??...?##."
-# sortie => ['???', '.', '###'] || ['.', '??', '..', '??', '...', '?', '##', '.']
-def cut_the_string(str)
-  substring = []
-  i = 0
-  while i < str.length
-    characters = str[i]
-    i += 1
-    while str[i] == str[i - 1]
-      characters += str[i]
-      i += 1
-    end
-    substring << characters
-  end
-  substring
+# méthode pour donner les index des '?' dans la ligne
+def question_marks(str)
+  str.count('?')
 end
 
-# méthode pour donner toutes les possibilités pour une série de '?'
-# entrée => '???', nombre max
-# sortie => ['...', '..#', '#.#', etc]
-def all_possibilities(substr, m)
-  l = substr.length
-  n = m > l ? l : m
+# méthode pour donner les façons de remplacer les '?'
+# entrée => m = nombre de '#' manquants, q = nombre de '?'
+# sortie => [["#", "#", "."], ["#", ".", "#"], [".", "#", "#"]]
+@m_pos_chars = {}
+def sub_question(m, q)
   arr = []
-  n.times { arr << '#' }
-  l.times { arr << '.' }
-  arr.permutation(l).to_a.map(&:join).uniq
+  m.times { arr << '#' }
+  (q - m).times { arr << '.' }
+  answer = arr.permutation(q).to_a.uniq
+  @m_pos_chars[[m, q]] = answer
+  answer
 end
 
-# méthode pour donner les substitutions à faire
-# entrée => ['???', '.', '###'], nombre max
-# sortie => [["0-##.", "0-#.#", "0-#..", "0-.##", "0-.#.", "0-..#", "0-..."]]
-def all_substitutions(cutted_str, m)
-  substitutions = []
-  cutted_str.each_with_index do |chars, index|
-    next unless chars[0] == '?'
-
-    poss = all_possibilities(chars, m)
-    these_subs = []
-    poss.each do |pos|
-      these_subs << "#{index}-#{pos}"
+def create_new_line(str, pos_chars)
+  new_line = []
+  str.chars.each do |char|
+    if ['#', '.'].include?(char)
+      new_line << char
+    else
+      new_line << pos_chars[0]
+      pos_chars.delete_at(0)
     end
-    substitutions << these_subs
   end
-  substitutions
+  new_line.join
 end
 
-# méthode pour donner le nombre d'arrangements possibles pour une string
-# entrée => "???.###", [1, 1, 3]
-# sortie => 1
+# on crée une nouvelle ligne en remplaçant chaque '?' par '#' ou par '.'
+# on vérifie si elle est valide (count += 1 si oui)
 def find_arrangements(str, arr)
-  count = 0
   m = missing_damaged(str, arr)
-  cutted_str = cut_the_string(str)
-  substitutions = all_substitutions(cutted_str, m)
-  if substitutions.size == 1
-    all_possibilities = substitutions.dup.flatten.map { |a| [a] }
-  else
-    all_possibilities = substitutions.reduce { |acc, arr| acc.product(arr) }.map(&:flatten)
-  end
-  all_possibilities.each do |poss|
-    next if poss.join.count('#') > m
-
-    new_str = cutted_str.dup
-    poss.each do |code|
-      new_str[code.split('-')[0].to_i] = code.split('-')[1]
-    end
-    count += 1 if valid_arrangement?(new_str.join, arr)
+  q = question_marks(str)
+  possible_arrangements = @m_pos_chars[[m, q]] || sub_question(m, q)
+  count = 0
+  possible_arrangements.each do |pos_chars|
+    new_line = create_new_line(str, pos_chars)
+    count += 1 if valid_arrangement?(new_line, arr)
   end
   count
 end
 
-def answer1(lines, contiguous)
-  possible_arrangements = []
-  lines.each_with_index do |line, index|
-    possible_arrangements << find_arrangements(line, contiguous[index])
-  end
-  possible_arrangements.sum
+def answer1(rows)
+  rows.sum { |row| find_arrangements(row[0], row[1]) }
 end
 # puts answer1(test1lines, test1contiguous)
 
@@ -130,22 +104,9 @@ end
 
 # # # ANSWERS # # #
 
-# getting the data from the terminal
-all_rows = []
-puts "Entrez les lignes (tapez 'fin' pour terminer la saisie) :"
-input = gets.chomp
-
-while input.downcase != 'fin'
-  all_rows << input
-  input = gets.chomp
-end
-
 puts '-----------'
 puts 'Réponse de la partie 1 :'
-data_splited = separate_data(all_rows)
-lines = data_splited[0]
-contiguous = data_splited[1]
-puts answer1(lines, contiguous)
+puts answer1(all_rows)
 puts '-----------'
 
 # puts 'Réponse de la partie 2 :'

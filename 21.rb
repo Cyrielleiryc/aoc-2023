@@ -81,7 +81,6 @@ def answer1(map, steps)
   return odds.length if steps.odd?
 end
 
-
 # # # PART TWO # # #
 
 # # # ANSWERS # # #
