@@ -60,10 +60,10 @@ end
 
 # # # ANSWERS # # #
 
-puts '-----------'
-puts 'Réponse de la partie 1 :'
-puts answer1(hailstones, 200000000000000, 400000000000000)
-puts '-----------'
+# puts '-----------'
+# puts 'Réponse de la partie 1 :'
+# puts answer1(hailstones, 200000000000000, 400000000000000)
+# puts '-----------'
 
 # puts 'Réponse de la partie 2 :'
 # puts '-----------'
