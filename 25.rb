@@ -64,8 +64,13 @@ test_components = {'jqt'=>'grey', 'rhn'=>'grey', 'xhk'=>'grey', 'nvd'=>'grey', '
 
 # # # PART ONE # # #
 
+# on prend une paire de départ
+# on trouve tous les composants reliés directement ou indirectement à cette paire
+# on supprime au fur et à mesure les paires utilisées
+# la boucle se stoppe quand on ne trouve plus de paires 
+
 def color_components(pairs, components)
-  
+
 end
 puts color_components(test_diagram, test_components).to_s
 
